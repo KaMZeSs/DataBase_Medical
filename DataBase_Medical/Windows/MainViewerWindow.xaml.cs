@@ -10,17 +10,16 @@ using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
 
-namespace DataBase_Medical
+namespace DataBase_Medical.Windows
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Логика взаимодействия для MainViewerWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainViewerWindow : Window
     {
-        public MainWindow()
+        public MainViewerWindow()
         {
             InitializeComponent();
         }

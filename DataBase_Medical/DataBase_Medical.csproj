@@ -8,7 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="ModernWpfUI" Version="0.9.6" />
+    <Compile Remove="Assets\**" />
+    <EmbeddedResource Remove="Assets\**" />
+    <None Remove="Assets\**" />
+    <Page Remove="Assets\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MaterialDesignThemes" Version="4.8.0" />
   </ItemGroup>
 
 </Project>
