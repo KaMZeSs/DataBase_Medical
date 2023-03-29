@@ -25,4 +25,22 @@ namespace DataBase_Medical.Windows
         public string Отделение { get; set; }
         public string Категория { get; set; }
     }
+
+    public class Ill // Класс для примера интерфейса
+    {
+        //public int id;
+        public string Имя { get; set; }
+        public string Фамилия { get; set; }
+        public string Отчество { get; set; }
+        public string Дата_рождения { get; set; }
+        public string Социальное_положение { get; set; }
+        public string Лечащий_врач { get; set; }
+    }
+
+    public class Categories // Класс для примера интерфейса
+    {
+        //public int id;
+        public string Название_категории { get; set; }
+    }
+
 }

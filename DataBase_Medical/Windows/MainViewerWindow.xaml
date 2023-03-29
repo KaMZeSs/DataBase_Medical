@@ -18,6 +18,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <Grid Grid.Row="0">
@@ -35,20 +36,20 @@
                 </MenuItem.Header>
             </MenuItem>
 
-            <MenuItem Header="Больные" Visibility="Visible"/>
-            <MenuItem Header="Персонал" Visibility="Visible"/>
-            <MenuItem Header="Заболевания" Visibility="Collapsed"/>
-            <MenuItem Header="Процедуры" Visibility="Collapsed"/>
-            <MenuItem Header="Отделения" Visibility="Collapsed"/>
-            <MenuItem Header="Социальное положение" Visibility="Collapsed"/>
-            <MenuItem Header="Категории" Visibility="Collapsed"/>
+            <MenuItem Header="Больные" Visibility="Collapsed"/>
+            <MenuItem Header="Персонал" Visibility="Collapsed"/>
+            <MenuItem Header="Заболевания" Visibility="Visible"/>
+            <MenuItem Header="Процедуры" Visibility="Visible"/>
+            <MenuItem Header="Отделения" Visibility="Visible"/>
+            <MenuItem Header="Социальное положение" Visibility="Visible"/>
+            <MenuItem Header="Категории" Visibility="Visible"/>
         </Menu>
 
         <DataGrid x:Name="data_table" AutoGenerateColumns="True" 
                   Grid.Row="1"
                   Style="{StaticResource DataGrid_Style}"
                   CanUserAddRows="False" CanUserDeleteRows="False"
-                  ItemsSource="{DynamicResource ResourceKey=staff_small}"
+                  ItemsSource="{DynamicResource ResourceKey=cat}"
                   IsReadOnly="True">
             <DataGrid.Resources>
                 <col:ArrayList x:Key="staff">
@@ -79,7 +80,7 @@
                     <local:HospitalStaff Имя="Иван" Отчество="Иванович" Фамилия="Иванов" 
                                          Отделение="Травматология" Категория="Высшая" 
                                          Дата_принятия_на_работу="20.12.2019" 
-                                         Зарплата="20000 руб."/>
+                                         Зарплата="20000 руб.ц"/>
                     <local:HospitalStaff Имя="Даниил" Отчество="Витальевич" Фамилия="Филеев" 
                                          Отделение="Травматология" Категория="Вторая" 
                                          Дата_принятия_на_работу="10.06.2020" 
@@ -90,7 +91,39 @@
                                          Зарплата="15000 руб."/>
 
                 </col:ArrayList>
+
+                <col:ArrayList x:Key="ill">
+                    <local:Ill Имя="Иван" Отчество="Иванович" Фамилия="Иванов" 
+                                         Дата_рождения="13.05.2000" 
+                                         Социальное_положение="Рабочий" 
+                                         Лечащий_врач="Иванов И.И."/>
+                    <local:Ill Имя="Иван" Отчество="Иванович" Фамилия="Иванов" 
+                                         Дата_рождения="20.12.1999" 
+                                         Социальное_положение="Рабочий" 
+                                         Лечащий_врач="Иванов И.И."/>
+                    <local:Ill Имя="Иван" Отчество="Иванович" Фамилия="Иванов" 
+                                         Дата_рождения="20.12.1980" 
+                                         Социальное_положение="Пенсионер" 
+                                         Лечащий_врач="Иванов И.И."/>
+
+                </col:ArrayList>
+                <col:ArrayList x:Key="cat">
+                    <local:Categories Название_категории="Высшая"/>
+                    <local:Categories Название_категории="Первая"/>
+                    <local:Categories Название_категории="Вторая"/>
+                </col:ArrayList>
             </DataGrid.Resources>
         </DataGrid>
+
+        <WrapPanel Grid.Row="2">
+            <WrapPanel Visibility="Collapsed">
+                <Button Content="Добавить сотрудника" Margin="5, 0, 5, 0" Style="{StaticResource Button_Style}" />
+                <Button Content="Уволить сотрудника" Margin="5, 0, 5, 0" Style="{StaticResource Button_Style}" />
+            </WrapPanel>
+            <WrapPanel Visibility="Collapsed">
+                <Button Content="Добавить больного" Margin="5, 0, 5, 0" Style="{StaticResource Button_Style}" />
+            </WrapPanel>
+            
+        </WrapPanel>
     </Grid>
 </Window>

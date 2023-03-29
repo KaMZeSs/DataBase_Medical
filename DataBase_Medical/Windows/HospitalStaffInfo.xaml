@@ -22,7 +22,7 @@
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
-            <RowDefinition></RowDefinition>
+            <RowDefinition ></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -46,28 +46,28 @@
         <Label Grid.Row="2" Style="{StaticResource InfoField_Style}">
             Имя:
         </Label>
-        <Label Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Collapsed">
+        <Label Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
             Иван
         </Label>
-        <RibbonTextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Visible" Text="Иван" />
+        <RibbonTextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Иван" />
 
         <!--Отчество-->
         <Label Grid.Row="3" Style="{StaticResource InfoField_Style}">
             Отчество:
         </Label>
-        <Label Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Collapsed">
+        <Label Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
             Иванович
         </Label>
-        <RibbonTextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Visible" Text="Иванович" />
+        <RibbonTextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Иванович" />
 
         <!--Отделение-->
         <Label Grid.Row="4" Style="{StaticResource InfoField_Style}">
             Отделение:
         </Label>
-        <Label Grid.Row="4" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Collapsed">
+        <Label Grid.Row="4" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
             Травматология
         </Label>
-        <ComboBox Grid.Row="4" Grid.Column="1" Style="{StaticResource ComboBox_Style}" Visibility="Visible">
+        <ComboBox Grid.Row="4" Grid.Column="1" Style="{StaticResource ComboBox_Style}" Visibility="Collapsed">
             <ComboBox.Items>
                 <ComboBoxItem>Травматология</ComboBoxItem>
                 <ComboBoxItem>Геникология</ComboBoxItem>
@@ -78,10 +78,10 @@
         <Label Grid.Row="5" Style="{StaticResource InfoField_Style}">
             Категория:
         </Label>
-        <Label Grid.Row="5" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Collapsed">
+        <Label Grid.Row="5" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
             Высшая
         </Label>
-        <ComboBox Grid.Row="5" Grid.Column="1" Style="{StaticResource ComboBox_Style}" Visibility="Visible">
+        <ComboBox Grid.Row="5" Grid.Column="1" Style="{StaticResource ComboBox_Style}" Visibility="Collapsed">
             <ComboBox.Items>
                 <ComboBoxItem>Высшая</ComboBoxItem>
                 <ComboBoxItem>Первая</ComboBoxItem>
@@ -95,22 +95,22 @@
                 Принят на работу:
             </TextBlock>
         </Label>
-        <Label Grid.Row="6" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Collapsed">
+        <Label Grid.Row="6" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
             20.12.2019
         </Label>
-        <DatePicker Grid.Row="6" Grid.Column="1" Style="{StaticResource DatePicker_Style}"  Visibility="Visible" Text="20.12.2019"/>
+        <DatePicker Grid.Row="6" Grid.Column="1" Style="{StaticResource DatePicker_Style}"  Visibility="Collapsed" Text="20.12.2019"/>
 
         <!--Оклад-->
         <Label Grid.Row="7" Style="{StaticResource InfoField_Style}">
             Оклад:
         </Label>
-        <Label Grid.Row="7" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Collapsed">
+        <Label Grid.Row="7" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
             20000 руб.
         </Label>
-        <RibbonTextBox Grid.Row="7" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Visible" Text="20000 руб." />
+        <RibbonTextBox Grid.Row="7" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="20000 руб." />
         
         <!--Кнопка редактирования-->
-        <Button Grid.Row="8" Grid.Column="0" Content="Редактировать" Margin="0, 0, 10, 0" Style="{StaticResource Button_Style}"/>
+        <Button Grid.Row="8" Grid.Column="0" Content="Редактировать" Margin="0, 0, 10, 0" Style="{StaticResource Button_Style}" IsEnabled="True"/>
         
         <!--Кнопки подтверждения редактирования и его отмены-->
         <Grid Grid.Row="8" Grid.Column="1">

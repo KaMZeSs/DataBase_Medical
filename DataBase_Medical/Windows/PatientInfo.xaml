@@ -11,9 +11,10 @@
         Style="{StaticResource Window_Style}"
         
         Title="Заведующий отделения: Иванов И.И." 
-        Height="400" Width="375">
+        Height="420" Width="375">
     <Grid Margin="10, 0, 10, 10">
         <Grid.RowDefinitions>
+            <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
             <RowDefinition></RowDefinition>
@@ -83,29 +84,46 @@
             10.11.1986
         </Label>
         <DatePicker Grid.Row="5" Grid.Column="1" Style="{StaticResource DatePicker_Style}"  Visibility="Collapsed" Text="10.11.1986"/>
+        
+        <!--Лечащий врач-->
+        <Label Grid.Row="6" Style="{StaticResource InfoField_Style}">
+            Лечащий врач:
+        </Label>
+        <Label Grid.Row="6" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
+            Иванов И.И.
+        </Label>
+        <ComboBox Grid.Row="6" Grid.Column="1" Style="{StaticResource ComboBox_Style}" Visibility="Collapsed">
+            <ComboBox.Items>
+                <ComboBoxItem>Иванов И.И.</ComboBoxItem>
+                <ComboBoxItem>Филеев Д.В.</ComboBoxItem>
+                <ComboBoxItem>Климова И.И.</ComboBoxItem>
+            </ComboBox.Items>
+        </ComboBox>
 
         <!--Кнопка редактирования-->
-        <Button Grid.Row="6" Grid.Column="0" Content="Редактировать" Margin="0, 0, 10, 0" Style="{StaticResource Button_Style}" Visibility="Visible"/>
+        
 
         <!--Кнопки подтверждения редактирования и его отмены-->
-        <Grid Grid.Row="6" Grid.Column="1" Visibility="Visible">
+        
+        <Grid Grid.Row="7" Grid.ColumnSpan="2" Visibility="Collapsed">
             <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
-
-            <Button Grid.Column="0" Content="Отмена" Margin="5, 7, 0, 7" Style="{StaticResource Button_Style}" IsEnabled="False"/>
-            <Button Grid.Column="1" Content="Ок" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}" IsEnabled="False"/>
+            <Button Grid.Row="7" Grid.Column="0" Content="Редактировать" Margin="0, 0, 10, 0" Style="{StaticResource Button_Style}" IsEnabled="True"/>
+            <Button Grid.Column="1" Content="Отмена" Margin="5, 7, 0, 7" Style="{StaticResource Button_Style}" IsEnabled="False"/>
+            <Button Grid.Column="2" Content="Ок" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}" IsEnabled="False"/>
         </Grid>
 
-        <Grid Grid.Row="7" Grid.ColumnSpan="2" Height="Auto">
+        <Grid Grid.Row="8" Grid.ColumnSpan="2" Height="Auto">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition></ColumnDefinition>
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="0" Content="Нахождение" Margin="5, 7, 0, 7" Style="{StaticResource Button_Style}"/>
-            <Button Grid.Column="1" Content="Назначения" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}"/>
+            <Button Grid.Column="0" Content="Назначения" Margin="5, 7, 0, 7" Style="{StaticResource Button_Style}"/>
+            <Button Grid.Column="1" Content="Нахождение" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}"/>
         </Grid>
     </Grid>
 </Window>
