@@ -15,11 +15,11 @@ using System.Windows.Shapes;
 namespace DataBase_Medical.Windows
 {
     /// <summary>
-    /// Логика взаимодействия для MainViewerWindow.xaml
+    /// Логика взаимодействия для Window_Doctor.xaml
     /// </summary>
-    public partial class MainViewerWindow : Window
+    public partial class Window_Doctor : Window
     {
-        public MainViewerWindow()
+        public Window_Doctor()
         {
             InitializeComponent();
         }

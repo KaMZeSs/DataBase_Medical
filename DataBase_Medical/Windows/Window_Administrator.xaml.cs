@@ -15,11 +15,11 @@ using System.Windows.Shapes;
 namespace DataBase_Medical.Windows
 {
     /// <summary>
-    /// Логика взаимодействия для HospitalStaffInfo.xaml
+    /// Логика взаимодействия для Window_Administrator.xaml
     /// </summary>
-    public partial class HospitalStaffInfo : Window
+    public partial class Window_Administrator : Window
     {
-        public HospitalStaffInfo()
+        public Window_Administrator()
         {
             InitializeComponent();
         }

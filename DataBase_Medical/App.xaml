@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              
-             StartupUri="Windows/MainViewerWindow.xaml">
+             StartupUri="Windows/Window_Administrator.xaml">
     
     <Application.Resources>
         
@@ -50,7 +50,7 @@
             </Style>
             
             <Style x:Key="InfoField_Style" TargetType="{x:Type Label}" BasedOn="{StaticResource MaterialDesignLabel}">
-                <Setter Property="FontSize" Value="17"/>
+                <Setter Property="FontSize" Value="15"/>
                 <Setter Property="VerticalAlignment" Value="Center"/>
             </Style>
 
