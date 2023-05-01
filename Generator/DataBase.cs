@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 using Microsoft.VisualBasic;
+
+using Npgsql;
 
 using Randomize;
 
@@ -38,6 +42,11 @@ namespace Generator
 
                 return categories.ToArray();
             }
+
+            public override string ToString()
+            {
+                return $"({category_id + 1}, \'{category_name}\')";
+            }
         }
 
         public class Disease
@@ -60,6 +69,11 @@ namespace Generator
                 }
 
                 return diseases.ToArray();
+            }
+
+            public override string ToString()
+            {
+                return $"({disease_id + 1}, \'{disease_name}\')";
             }
         }
 
@@ -84,6 +98,11 @@ namespace Generator
 
                 return jobTitles.ToArray();
             }
+
+            public override string ToString()
+            {
+                return $"({jobTitle_id + 1}, \'{jobTitle_name}\')";
+            }
         }
 
         public class Procedure
@@ -107,6 +126,11 @@ namespace Generator
 
                 return procedures.ToArray();
             }
+
+            public override string ToString()
+            {
+                return $"({procedure_id + 1}, \'{procedure_name}\')";
+            }
         }
 
         public class SocialStatus
@@ -129,6 +153,11 @@ namespace Generator
                 }
 
                 return socialStatuses.ToArray();
+            }
+
+            public override string ToString()
+            {
+                return $"({socialStatus_id + 1}, \'{socialStatus_name}\')";
             }
         }
 
@@ -165,6 +194,13 @@ namespace Generator
                 }
 
                 return departments.ToArray();
+            }
+
+
+            public override string ToString()
+            {
+                var is_exists = department_exists ? "true" : "false";
+                return $"({department_id + 1}, \'{department_name}\', {department_beds}, \'{department_phone}\', \'{is_exists}\')";
             }
         }
 
@@ -296,6 +332,18 @@ namespace Generator
 
                 return staff_list.ToArray();
             }
+
+            public override string ToString()
+            {
+                if (staff_Department_id is -1)
+                {
+                    return $"({staff_id + 1}, \'{staff_Name}\', '{staff_Surname}', '{staff_Patronymic}', NULL, {staff_Category_id + 1}, \'{staff_EmploymentDate:dd-MM-yyyy}\', {staff_Salary}, {staff_JobTitle_id + 1}, \'{staff_login}\')";
+                }
+                else
+                {
+                    return $"({staff_id + 1}, \'{staff_Name}\', '{staff_Surname}', '{staff_Patronymic}', {staff_Department_id + 1}, {staff_Category_id + 1}, \'{staff_EmploymentDate:dd-MM-yyyy}\', {staff_Salary}, {staff_JobTitle_id + 1}, \'{staff_login}\')";
+                }
+            }
         }
 
         public class Patient
@@ -338,6 +386,11 @@ namespace Generator
 
                 return patients.ToArray();
             }
+
+            public override string ToString()
+            {
+                return $"({patient_id + 1}, \'{patient_Name}\', '{patient_Surname}', '{patient_Patronymic}', \'{patient_Birthday:dd-MM-yyyy}\', {patient_SocialStatus_id + 1}, {patient_CurrentDoctor_id + 1})";
+            }
         }
 
         public class PatientDiseases
@@ -375,6 +428,19 @@ namespace Generator
                 }
 
                 return patient_diseases.ToArray();
+            }
+
+            public override string ToString()
+            {
+                if (patientDiseases_isCured)
+                {
+                    return $"({patientDiseases_id + 1}, {patientDiseases_patient_id + 1}, {patientDiseases_decease_id + 1}, '{patientDiseases_Start_Date:dd-MM-yyyy}', '{patientDiseases_End_Date:dd-MM-yyyy}')";
+                }
+                else
+                {
+                    return $"({patientDiseases_id + 1}, {patientDiseases_patient_id + 1}, {patientDiseases_decease_id + 1}, '{patientDiseases_Start_Date:dd-MM-yyyy}', NULL)";
+                }
+                
             }
         }
 
@@ -415,6 +481,20 @@ namespace Generator
                 }
 
                 return hospitalStays.ToArray();
+            }
+
+            public override string ToString()
+            {
+                var str_end_date_isNull = hospitalStay_End_Date == DateOnly.MinValue;
+
+                if (str_end_date_isNull)
+                {
+                    return $"({hospitalStay_id + 1}, {hospitalStay_Patient_id + 1}, '{hospitalStay_Start_Date:dd-MM-yyyy}', NULL, {hospitalStay_Cost}, {hospitalStay_Department_id + 1})";
+                }
+                else
+                {
+                    return $"({hospitalStay_id + 1}, {hospitalStay_Patient_id + 1}, '{hospitalStay_Start_Date:dd-MM-yyyy}', '{hospitalStay_End_Date:dd-MM-yyyy}', {hospitalStay_Cost}, {hospitalStay_Department_id + 1})";
+                }
             }
         }
 
@@ -459,6 +539,11 @@ namespace Generator
 
                 return doctorAppointments.ToArray();
             }
+
+            public override string ToString()
+            {
+                return $"({doctorAppointment_id + 1}, {doctorAppointment_procedure_id + 1}, {doctorAppointment_patient_id + 1}, {doctorAppointment_doctor_id + 1}, \'{doctorAppointment_interval}\', \'{doctorAppointment_Start_Date:dd-MM-yyyy HH:mm:ss}\', {doctorAppointment_Count})";
+            }
         }
 
         #endregion
@@ -481,24 +566,199 @@ namespace Generator
 
             var path = Environment.CurrentDirectory;
 
+            Console.WriteLine($"{DateTime.Now}: Загрузка данных для генерации");
             var first_names = PartOfName.DeserializePartsOfName(path + "\\Data\\Firstnames.xml");
             var second_names = PartOfName.DeserializePartsOfName(path + "\\Data\\Midnames.xml");
             var last_names = PartOfName.DeserializePartsOfName(path + "\\Data\\Lastnames.xml");
 
+            Console.WriteLine($"{DateTime.Now}: Генерация данных");
+            Console.WriteLine($"{DateTime.Now}: Генерация категорий");
             db.Categories = Category.GetCategories(File.ReadAllLines(path + "\\Data\\Category.txt"));
+            Console.WriteLine($"{DateTime.Now}: Генерация болезней");
             db.Diseases = Disease.GetDiseases(File.ReadAllLines(path + "\\Data\\Diseases.txt"));
+            Console.WriteLine($"{DateTime.Now}: Генерация должностей");
             db.JobTitles = JobTitle.GetJobTitles(File.ReadAllLines(path + "\\Data\\JobTitle.txt"));
+            Console.WriteLine($"{DateTime.Now}: Генерация процедур");
             db.Procedures = Procedure.GetProcedures(File.ReadAllLines(path + "\\Data\\Procedures.txt"));
+            Console.WriteLine($"{DateTime.Now}: Генерация социальных статусов");
             db.SocialStatuses = SocialStatus.GetSocialStatuses(File.ReadAllLines(path + "\\Data\\SocialStatus.txt"));
-            
+            Console.WriteLine($"{DateTime.Now}: Генерация отделений");
             db.Departments = Department.GenerateDepartments(10, File.ReadAllLines(path + "\\Data\\Department.txt"), 15, 50);
+            Console.WriteLine($"{DateTime.Now}: Генерация сотрудников");
             db.Staff_list = Staff.GenerateStaffList(150, db.Departments, db.Categories, db.JobTitles, first_names, second_names, last_names);
+            Console.WriteLine($"{DateTime.Now}: Генерация пациентов");
             db.Patients = Patient.GeneratePatients(500, db.SocialStatuses, db.Staff_list, first_names, second_names, last_names, db.JobTitles);
+            Console.WriteLine($"{DateTime.Now}: Генерация болезней пациентов");
             db.PatientDiseases_list = PatientDiseases.GeneratePatientDiseases(5, db.Patients, db.Diseases);
+            Console.WriteLine($"{DateTime.Now}: Генерация нахождений пациентов");
             db.HospitalStays = HospitalStay.GenerateHospitalStays(5, db.Patients, db.Departments);
+            Console.WriteLine($"{DateTime.Now}: Генерация назначений врачей");
             db.DoctorAppointments = DoctorAppointment.GenerateDoctorAppointments(10, db.Patients, db.Staff_list, db.Procedures, db.JobTitles);
+            Console.WriteLine($"{DateTime.Now}: Генерация данных завершена");
 
             return db;
+        }
+
+        public void Send(string connectString = "Host=localhost;Port=5432;User Id=postgres;Password=1310;Database=postgres;Timeout=300;CommandTimeout=300;")
+        {
+            var conn = new NpgsqlConnection(connectString);
+            string sql;
+            NpgsqlCommand cmd;
+
+            string[] toClear = 
+            { 
+                "DELETE FROM \"DoctorAppointment\"",
+                "DELETE FROM \"HospitalStay\"",
+                "DELETE FROM \"PatientDiseases\"",
+                "DELETE FROM \"Patient\"",
+                "DELETE FROM \"Staff\"",
+                "DELETE FROM \"Department\"",
+                "DELETE FROM \"SocialStatus\"",
+                "DELETE FROM \"Procedure\"",
+                "DELETE FROM \"JobTitle\"",
+                "DELETE FROM \"Disease\"",
+                "DELETE FROM \"Category\""
+            };
+
+            var firstParts = new Dictionary<string, string>()
+            {
+                { "Category", "INSERT INTO \"Category\" (\"Category_Id\", \"Category_Name\") VALUES " },
+                { "Disease", "INSERT INTO \"Disease\" (\"Disease_Id\", \"Disease_Name\") VALUES " },
+                { "JobTitle", "INSERT INTO \"JobTitle\" (\"JobTitle_Id\", \"JobTitle_Name\") VALUES " },
+                { "Procedure", "INSERT INTO \"Procedure\" (\"Procedure_Id\", \"Procedure_Name\") VALUES " },
+                { "SocialStatus", "INSERT INTO \"SocialStatus\" (\"SocialStatus_Id\", \"SocialStatus_Name\") VALUES " },
+                { "Department", "INSERT INTO \"Department\" (\"Department_Id\", \"Department_Name\", \"Department_Beds\", \"Department_Phone\", \"Department_Exists\") VALUES " },
+                { "Staff", "INSERT INTO \"Staff\" (\"Staff_Id\", \"Staff_Name\", \"Staff_Surname\", \"Staff_Patronymic\", \"Staff_Department_Id\", \"Staff_Category_Id\", \"Staff_EmploymentDate\", \"Staff_Salary\", \"Staff_JobTitle_Id\", \"Staff_Login\") VALUES " },
+                { "Patient", "INSERT INTO \"Patient\" (\"Patient_Id\", \"Patient_Name\", \"Patient_Surname\", \"Patient_Patronymic\", \"Patient_BirthDay\", \"Patient_SocialStatus_Id\", \"Patient_CurrentDoctor_Id\") VALUES " },
+                { "PatientDiseases", "INSERT INTO \"PatientDiseases\" (\"PatientDiseases_Id\", \"PatientDiseases_Patient_Id\", \"PatientDiseases_Disease_Id\", \"PatientDiseases_Start_Date\", \"PatientDiseases_End_Date\") VALUES " },
+                { "HospitalStay", "INSERT INTO \"HospitalStay\" (\"HospitalStay_Id\", \"HospitalStay_Patient_Id\", \"HospitalStay_Start_Date\", \"HospitalStay_End_Date\", \"HospitalStay_Cost\", \"HospitalStay_Department_Id\") VALUES " },
+                { "DoctorAppointment", "INSERT INTO \"DoctorAppointment\" (\"DoctorAppointment_Id\", \"DoctorAppointment_Procedure_Id\", \"DoctorAppointment_Patient_id\", \"DoctorAppointment_Doctor_Id\", \"DoctorAppointment_Interval\", \"DoctorAppointment_Start_Date\", \"DoctorAppointment_Count\") VALUES " }
+            };
+
+            var Sequences = new Dictionary<string, string>()
+            {
+                { "Category", $"ALTER SEQUENCE \"Category_Category_Id_seq\" RESTART WITH {this.Categories.Length + 1}" },
+                { "Disease", $"ALTER SEQUENCE \"Disease_Disease_Id_seq\" RESTART WITH {this.Diseases.Length + 1}" },
+                { "JobTitle", $"ALTER SEQUENCE \"JobTitle_JobTitle_Id_seq\" RESTART WITH  {this.JobTitles.Length + 1}" },
+                { "Procedure", $"ALTER SEQUENCE \"Procedure_procedure_id_seq\" RESTART WITH  {this.Procedures.Length + 1}" },
+                { "SocialStatus", $"ALTER SEQUENCE \"SocialStatus_SocialStatus_id_seq\" RESTART WITH  {this.SocialStatuses.Length + 1}" },
+                { "Department", $"ALTER SEQUENCE \"Department_Department_id_seq\" RESTART WITH {this.Departments.Length + 1}" },
+                { "Staff", $"ALTER SEQUENCE \"Staff_Staff_id_seq\" RESTART WITH  {this.Staff_list.Length + 1}" },
+                { "Patient", $"ALTER SEQUENCE \"Patient_Patient_Id_seq\" RESTART WITH  {this.Patients.Length + 1}" },
+                { "PatientDiseases", $"ALTER SEQUENCE \"PatientDeceases_PatientDeceases_Id_seq\" RESTART WITH  {this.PatientDiseases_list.Length + 1}" },
+                { "HospitalStay", $"ALTER SEQUENCE \"HospitalStay_HospitalStay_Id_seq\" RESTART WITH  {this.HospitalStays.Length + 1}" },
+                { "DoctorAppointment", $"ALTER SEQUENCE \"DoctorAppointment_DoctorAppointment_Id_seq\" RESTART WITH  {this.DoctorAppointments.Length + 1}" }
+            };
+
+            try
+            {
+                Console.WriteLine($"{DateTime.Now}: Установление связи с сервером");
+                conn.Open();
+
+                Console.WriteLine($"{DateTime.Now}: Очистка данных на сервере");
+                foreach (var line in toClear)
+                {
+                    cmd = new NpgsqlCommand(line, conn);
+                    cmd.ExecuteNonQuery();
+                }
+
+                sql = "SELECT \'DROP ROLE IF EXISTS \' || usename FROM pg_user WHERE usename NOT IN(\'postgres\')";
+                cmd = new NpgsqlCommand(sql, conn);
+                var reader = cmd.ExecuteReader();
+                List<string> dropQueries = new List<string>();
+
+                while (reader.Read())
+                {
+                    string dropQuery = reader.GetString(0);
+                    dropQuery = dropQuery.Replace("EXISTS ", "EXISTS \"") + "\"";
+                    dropQueries.Add(dropQuery);
+                }
+                reader.Close();
+
+                foreach (var line in dropQueries)
+                {
+                    cmd = new NpgsqlCommand(line, conn);
+                    cmd.ExecuteNonQuery();
+                }
+
+
+                Console.WriteLine($"{DateTime.Now}: Генерация команд для Category");
+                sql = firstParts["Category"] + String.Join(",\n", this.Categories.Select(x => x.ToString()).ToArray());
+                Console.WriteLine($"{DateTime.Now}: Выполнение команд для Category");
+                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+
+                Console.WriteLine($"{DateTime.Now}: Генерация команд для Disease");
+                sql = firstParts["Disease"] + String.Join(",\n", this.Diseases.Select(x => x.ToString()).ToArray());
+                Console.WriteLine($"{DateTime.Now}: Выполнение команд для Disease");
+                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+
+                Console.WriteLine($"{DateTime.Now}: Генерация команд для JobTitle");
+                sql = firstParts["JobTitle"] + String.Join(",\n", this.JobTitles.Select(x => x.ToString()).ToArray());
+                Console.WriteLine($"{DateTime.Now}: Выполнение команд для JobTitle");
+                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+
+                Console.WriteLine($"{DateTime.Now}: Генерация команд для Procedure");
+                sql = firstParts["Procedure"] + String.Join(",\n", this.Procedures.Select(x => x.ToString()).ToArray());
+                Console.WriteLine($"{DateTime.Now}: Выполнение команд для Procedure");
+                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+
+                Console.WriteLine($"{DateTime.Now}: Генерация команд для SocialStatus");
+                sql = firstParts["SocialStatus"] + String.Join(",\n", this.SocialStatuses.Select(x => x.ToString()).ToArray());
+                Console.WriteLine($"{DateTime.Now}: Выполнение команд для SocialStatus");
+                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+
+                Console.WriteLine($"{DateTime.Now}: Генерация команд для Department");
+                sql = firstParts["Department"] + String.Join(",\n", this.Departments.Select(x => x.ToString()).ToArray());
+                Console.WriteLine($"{DateTime.Now}: Выполнение команд для Department");
+                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+
+                Console.WriteLine($"{DateTime.Now}: Генерация команд для Staff");
+                sql = firstParts["Staff"] + String.Join(",\n", this.Staff_list.Select(x => x.ToString()).ToArray());
+                Console.WriteLine($"{DateTime.Now}: Выполнение команд для Staff");
+                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+
+                Console.WriteLine($"{DateTime.Now}: Генерация команд для Patient");
+                sql = firstParts["Patient"] + String.Join(",\n", this.Patients.Select(x => x.ToString()).ToArray());
+                Console.WriteLine($"{DateTime.Now}: Выполнение команд для Patient");
+                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+
+                Console.WriteLine($"{DateTime.Now}: Генерация команд для PatientDiseases");
+                sql = firstParts["PatientDiseases"] + String.Join(",\n", this.PatientDiseases_list.Select(x => x.ToString()).ToArray());
+                Console.WriteLine($"{DateTime.Now}: Выполнение команд для PatientDiseases");
+                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+
+                Console.WriteLine($"{DateTime.Now}: Генерация команд для HospitalStay");
+                sql = firstParts["HospitalStay"] + String.Join(",\n", this.HospitalStays.Select(x => x.ToString()).ToArray());
+                Console.WriteLine($"{DateTime.Now}: Выполнение команд для HospitalStay");
+                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+
+                Console.WriteLine($"{DateTime.Now}: Генерация команд для DoctorAppointment");
+                sql = firstParts["DoctorAppointment"] + String.Join(",\n", this.DoctorAppointments.Select(x => x.ToString()).ToArray());
+                Console.WriteLine($"{DateTime.Now}: Выполнение команд для DoctorAppointment");
+                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+
+                Console.WriteLine($"{DateTime.Now}: Создание пользователей в БД");
+                sql = "Select " + String.Join(", ",
+                    this.Staff_list.Select(x => $"create_user('{x.staff_login}', '{x.staff_login}')"));
+                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+                sql = $"Select grant_user_admin(\'{this.Staff_list[1].staff_login}\')";
+                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+
+                Console.WriteLine($"{DateTime.Now}: Выполнение команд для перестановки перечеслений");
+                foreach (var line in Sequences.Values)
+                {
+                    cmd = new NpgsqlCommand(line, conn);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception except)
+            {
+                Console.WriteLine($"{DateTime.Now}: Ошибка на сервере: {except.Message}\n\n{except.StackTrace}");
+            }
+            finally
+            {
+                conn.Close();
+            }
         }
     }
 }
