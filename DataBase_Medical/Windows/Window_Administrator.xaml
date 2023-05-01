@@ -11,7 +11,9 @@
         
         Title="Администратор: Иванов И.И." 
         Height="550" Width="700"
-        MinHeight="400" MinWidth="0">
+        MinHeight="400" MinWidth="0"
+        
+        Loaded="Window_Loaded">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition> <!--Меню-->
@@ -20,19 +22,17 @@
 
         <Grid Grid.Row="0">
             <Menu Style="{StaticResource Menu_Style}">
-                <MenuItem Header="Больные" Visibility="Visible"/>
-                <MenuItem Header="Персонал" Visibility="Visible"/>
-                <MenuItem Header="Отделения" Visibility="Visible"/>
-                <MenuItem Header="                                                                         " Visibility="Hidden"/>
-                <MenuItem Header="Заболевания" Visibility="Visible"/>
-                
-                <MenuItem Header="Процедуры" Visibility="Visible"/>
-                <MenuItem Header="Социальное положение" Visibility="Visible"/>
-                <MenuItem Header="Категории" Visibility="Visible"/>
+                <MenuItem Header="Больные" Visibility="Visible" Click="MenuItem_Click"/>
+                <MenuItem Header="Персонал" Visibility="Visible" Click="MenuItem_Click"/>
+                <MenuItem Header="Отделения" Visibility="Visible" Click="MenuItem_Click"/>
+                <MenuItem Header="Заболевания" Visibility="Visible" Click="MenuItem_Click"/>
+                <MenuItem Header="Процедуры" Visibility="Visible" Click="MenuItem_Click"/>
+                <MenuItem Header="Социальное положение" Visibility="Visible" Click="MenuItem_Click"/>
+                <MenuItem Header="Категории" Visibility="Visible" Click="MenuItem_Click"/>
             </Menu>
         </Grid> <!--Меню-->
 
-        <Grid Grid.Row="1" Visibility="Collapsed">
+        <Grid x:Name="Grid_Patient" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -196,7 +196,7 @@
             
         </Grid> <!--Больные-->
 
-        <Grid Grid.Row="1" Visibility="Visible">
+        <Grid x:Name="Grid_Staff" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -448,7 +448,7 @@
 
         </Grid> <!--Персонал-->
 
-        <Grid Grid.Row="1" Visibility="Collapsed">
+        <Grid x:Name="Grid_Department" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -599,7 +599,7 @@
 
         </Grid> <!--Отделения-->
         
-        <Grid Grid.Row="1" Visibility="Collapsed">
+        <Grid x:Name="Grid_Disease" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -723,7 +723,7 @@
 
         </Grid> <!--Заболевания-->
 
-        <Grid Grid.Row="1" Visibility="Collapsed">
+        <Grid x:Name="Grid_Procedure" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -847,7 +847,7 @@
 
         </Grid> <!--Процедуры-->
 
-        <Grid Grid.Row="1" Visibility="Collapsed">
+        <Grid x:Name="Grid_SocialStatus" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -971,7 +971,7 @@
 
         </Grid> <!--Социальные положения-->
 
-        <Grid Grid.Row="1" Visibility="Collapsed">
+        <Grid x:Name="Grid_Category" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -987,24 +987,24 @@
                 </Grid.RowDefinitions>
 
                 <Menu Grid.Row="1" Style="{StaticResource Menu_Style}">
-                    <MenuItem>
+                    <MenuItem Click="Category_MenuItem_Refresh_Click">
                         <MenuItem.Header>
                             <materialDesign:PackIcon Kind="Refresh" Height="19" Width="19"/>
                         </MenuItem.Header>
                     </MenuItem>
-                    <MenuItem>
+                    <MenuItem Click="Category_MenuItem_Search_Click">
                         <MenuItem.Header>
                             <materialDesign:PackIcon Kind="Search" Height="19" Width="19"/>
                         </MenuItem.Header>
                     </MenuItem>
-                    <MenuItem>
+                    <MenuItem Click="Category_MenuItem_Add_Click">
                         <MenuItem.Header>
                             <materialDesign:PackIcon Kind="Add" Height="22" Width="22"/>
                         </MenuItem.Header>
                     </MenuItem>
                 </Menu>
 
-                <Grid Grid.Row="2" Visibility="Collapsed">
+                <Grid x:Name="Category_Grid_Search" Grid.Row="2" Visibility="Collapsed">
                     <!--Инфа для поиска-->
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -1019,24 +1019,18 @@
                     <Label Grid.Row="0" Style="{StaticResource InfoField_Style}" FontSize="12">
                         Название:
                     </Label>
-                    <RibbonTextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
+                    <RibbonTextBox Name="Category_TextBox_SearchData" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
 
-                    <Button Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
+                    <Button x:Name="Category_Button_SearchData" Click="Category_Button_SearchData_Click" Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
                 </Grid>
                 <!--Поиск-->
 
-                <DataGrid Grid.Row="3"
-                  Style="{StaticResource DataGrid_Style}"
-                  CanUserAddRows="False" CanUserDeleteRows="False"
-                  IsReadOnly="True">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn>
-                            <DataGridTextColumn.Header>
-                                Название категории
-                            </DataGridTextColumn.Header>
-                        </DataGridTextColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <DataGrid Grid.Row="3" x:Name="Category_DataGrid"
+                      Style="{StaticResource DataGrid_Style}"
+                      CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
+                      SelectedCellsChanged="Category_DataGrid_SelectedCellsChanged"
+                      IsReadOnly="True" />
+
 
                 <Label Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource InfoTitle_Style}" FontSize="20">
                     Список категорий
@@ -1070,10 +1064,10 @@
                     <Label Grid.Row="1" Style="{StaticResource InfoField_Style}">
                         Название:
                     </Label>
-                    <Label Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Высшая
+                    <Label Name="Category_Label_Name" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
+                        В
                     </Label>
-                    <RibbonTextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Высшая" />
+                    <RibbonTextBox x:Name="Category_TextBox" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Высшая" />
 
                     <!--Кнопки редактирования, подтверждения редактирования и его отмены-->
                     <Grid Grid.Row="3" Grid.ColumnSpan="2" Visibility="Visible">
@@ -1082,9 +1076,15 @@
                             <ColumnDefinition></ColumnDefinition>
                             <ColumnDefinition></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="Редактировать" Style="{StaticResource Button_Style}" IsEnabled="True"/>
-                        <Button Grid.Column="1" Content="Отмена" Style="{StaticResource Button_Style}" IsEnabled="False"/>
-                        <Button Grid.Column="2" Content="Ок" Style="{StaticResource Button_Style}" IsEnabled="False"/>
+                        <Button x:Name="Category_Button_Reduct" Grid.Column="0" 
+                                Content="Редактировать" Style="{StaticResource Button_Style}" 
+                                IsEnabled="True" Click="Category_Button_Reduct_Click"/>
+                        <Button x:Name="Category_Button_Cancel" Grid.Column="1" 
+                                Content="Отмена" Style="{StaticResource Button_Style}" 
+                                IsEnabled="False" Click="Category_Button_Cancel_Click"/>
+                        <Button x:Name="Category_Button_Ok" Grid.Column="2" 
+                                Content="Ок" Style="{StaticResource Button_Style}" 
+                                IsEnabled="False" Click="Category_Button_Ok_Click"/>
                     </Grid>
 
                 </Grid>
