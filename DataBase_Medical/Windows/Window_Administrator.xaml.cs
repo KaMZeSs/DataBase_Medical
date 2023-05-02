@@ -66,11 +66,13 @@ namespace DataBase_Medical.Windows
                 case "Процедуры":
                 {
                     this.Grid_Procedure.Visibility = Visibility.Visible;
+                    Procedure_MenuItem_Refresh_Click(sender, e);
                     break;
                 }
                 case "Социальное положение":
                 {
                     this.Grid_SocialStatus.Visibility = Visibility.Visible;
+                    SocialStatus_MenuItem_Refresh_Click(sender, e);
                     break;
                 }
                 case "Категории":
@@ -161,6 +163,20 @@ namespace DataBase_Medical.Windows
                 Visibility.Collapsed : Visibility.Visible;
         }
 
+        private void Category_MenuItem_Add_Click(object sender, RoutedEventArgs e)
+        {
+            Category_Label_Name.Visibility = Visibility.Collapsed;
+            Category_TextBox.Visibility = Visibility.Visible;
+
+            Category_Button_Reduct.IsEnabled = false;
+            Category_Button_Ok.IsEnabled = true;
+            Category_Button_Cancel.IsEnabled = true;
+
+            Category_TextBox.Text = "";
+
+            Category_Selected_Id = "";
+        }
+
         private void Category_DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
             Category_Label_Name.Visibility = Visibility.Visible;
@@ -176,20 +192,6 @@ namespace DataBase_Medical.Windows
 
             Category_TextBox.Text = row?["Название категории"].ToString();
             Category_Label_Name.Content = row?["Название категории"].ToString();
-        }
-
-        private void Category_MenuItem_Add_Click(object sender, RoutedEventArgs e)
-        {
-            Category_Label_Name.Visibility = Visibility.Collapsed;
-            Category_TextBox.Visibility = Visibility.Visible;
-
-            Category_Button_Reduct.IsEnabled = false;
-            Category_Button_Ok.IsEnabled = true;
-            Category_Button_Cancel.IsEnabled = true;
-
-            Category_TextBox.Text = "";
-
-            Category_Selected_Id = "";
         }
 
         private void Category_Button_Reduct_Click(object sender, RoutedEventArgs e)
@@ -284,8 +286,355 @@ namespace DataBase_Medical.Windows
             }
         }
 
+
         #endregion
 
+        #region SocialStatus
+       
+        string? SocialStatus_Selected_Id = string.Empty;
 
+        private async void SocialStatus_MenuItem_Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            string? SocialStatus_Selected_Id = string.Empty;
+            SocialStatus_Label_Name.Content = "";
+            SocialStatus_Label_Name.Visibility = Visibility.Visible;
+            SocialStatus_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            SocialStatus_Button_Reduct.IsEnabled = true;
+            SocialStatus_Button_Ok.IsEnabled = false;
+            SocialStatus_Button_Cancel.IsEnabled = false;
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await conn.OpenAsync();
+                String sql = "Select * From \"SocialStatus\"";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "id", "SocialStatus_Id" },
+                    { "Название cоциального положения", "SocialStatus_Name" }
+                });
+
+                this.SocialStatus_DataGrid.ItemsSource = new DataView(dt);
+                this.SocialStatus_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+        }
+
+        private void SocialStatus_MenuItem_Search_Click(object sender, RoutedEventArgs e)
+        {
+            this.SocialStatus_Grid_Search.Visibility =
+               this.SocialStatus_Grid_Search.Visibility is Visibility.Visible ?
+               Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void SocialStatus_MenuItem_Add_Click(object sender, RoutedEventArgs e)
+        {
+            SocialStatus_Label_Name.Visibility = Visibility.Collapsed;
+            SocialStatus_TextBox_Name.Visibility = Visibility.Visible;
+
+            SocialStatus_Button_Reduct.IsEnabled = false;
+            SocialStatus_Button_Ok.IsEnabled = true;
+            SocialStatus_Button_Cancel.IsEnabled = true;
+
+            SocialStatus_TextBox_Name.Text = "";
+
+            SocialStatus_Selected_Id = "";
+        }
+
+        private void SocialStatus_DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            SocialStatus_Label_Name.Visibility = Visibility.Visible;
+            SocialStatus_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            SocialStatus_Button_Reduct.IsEnabled = true;
+            SocialStatus_Button_Ok.IsEnabled = false;
+            SocialStatus_Button_Cancel.IsEnabled = false;
+
+            var vs = SocialStatus_DataGrid.SelectedIndex;
+            var row = SocialStatus_DataGrid.Items[vs] as DataRowView;
+            SocialStatus_Selected_Id = row?["id"].ToString();
+
+            SocialStatus_TextBox_Name.Text = row?["Название cоциального положения"].ToString();
+            SocialStatus_Label_Name.Content = row?["Название cоциального положения"].ToString();
+        }
+
+        private void SocialStatus_Button_Reduct_Click(object sender, RoutedEventArgs e)
+        {
+            if (SocialStatus_Selected_Id == String.Empty)
+                return;
+            SocialStatus_Label_Name.Visibility = Visibility.Collapsed;
+            SocialStatus_TextBox_Name.Visibility = Visibility.Visible;
+
+            SocialStatus_Button_Reduct.IsEnabled = false;
+            SocialStatus_Button_Ok.IsEnabled = true;
+            SocialStatus_Button_Cancel.IsEnabled = true;
+
+            SocialStatus_TextBox_Name.Text = SocialStatus_Label_Name.Content.ToString();
+        }
+
+        private void SocialStatus_Button_Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            SocialStatus_Label_Name.Visibility = Visibility.Visible;
+            SocialStatus_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            SocialStatus_Button_Reduct.IsEnabled = true;
+            SocialStatus_Button_Ok.IsEnabled = false;
+            SocialStatus_Button_Cancel.IsEnabled = false;
+        }
+
+        private async void SocialStatus_Button_Ok_Click(object sender, RoutedEventArgs e)
+        {
+            SocialStatus_Label_Name.Visibility = Visibility.Visible;
+            SocialStatus_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            SocialStatus_Button_Reduct.IsEnabled = true;
+            SocialStatus_Button_Ok.IsEnabled = false;
+            SocialStatus_Button_Cancel.IsEnabled = false;
+            string sql;
+            if (SocialStatus_Selected_Id == "")
+            {
+                sql = $"Insert Into \"SocialStatus\" (\"SocialStatus_Name\") Values ('{SocialStatus_TextBox_Name.Text}')";
+            }
+            else
+            {
+                sql = $"Update \"SocialStatus\" Set \"SocialStatus_Name\" = '{SocialStatus_TextBox_Name.Text}' Where \"SocialStatus_Id\" = {SocialStatus_Selected_Id}";
+            }
+
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await conn.OpenAsync();
+                await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+
+            SocialStatus_MenuItem_Refresh_Click(sender, e);
+            SocialStatus_Label_Name.Content = SocialStatus_TextBox_Name.Text;
+        }
+
+        private async void SocialStatus_Button_SearchData_Click(object sender, RoutedEventArgs e)
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await conn.OpenAsync();
+                String sql = $"Select * From \"SocialStatus\" Where lower(\"SocialStatus_Name\") Like '%{SocialStatus_TextBox_SearchData.Text}%'";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "id", "SocialStatus_Id" },
+                    { "Название cоциального положения", "SocialStatus_Name" }
+                });
+
+                this.SocialStatus_DataGrid.ItemsSource = new DataView(dt);
+                this.SocialStatus_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+        }
+
+        #endregion
+
+        #region Procedure
+
+        string? Procedure_Selected_Id = string.Empty;
+
+        private async void Procedure_MenuItem_Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            string? Procedure_Selected_Id = string.Empty;
+            Procedure_Label_Name.Content = "";
+            Procedure_Label_Name.Visibility = Visibility.Visible;
+            Procedure_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            Procedure_Button_Reduct.IsEnabled = true;
+            Procedure_Button_Ok.IsEnabled = false;
+            Procedure_Button_Cancel.IsEnabled = false;
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await conn.OpenAsync();
+                String sql = "Select * From \"Procedure\"";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "id", "Procedure_Id" },
+                    { "Название процедуры", "Procedure_Name" }
+                });
+
+                this.Procedure_DataGrid.ItemsSource = new DataView(dt);
+                this.Procedure_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+        }
+
+        private void Procedure_MenuItem_Search_Click(object sender, RoutedEventArgs e)
+        {
+            this.Procedure_Grid_Search.Visibility =
+               this.Procedure_Grid_Search.Visibility is Visibility.Visible ?
+               Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void Procedure_MenuItem_Add_Click(object sender, RoutedEventArgs e)
+        {
+            Procedure_Label_Name.Visibility = Visibility.Collapsed;
+            Procedure_TextBox_Name.Visibility = Visibility.Visible;
+
+            Procedure_Button_Reduct.IsEnabled = false;
+            Procedure_Button_Ok.IsEnabled = true;
+            Procedure_Button_Cancel.IsEnabled = true;
+
+            Procedure_TextBox_Name.Text = "";
+
+            Procedure_Selected_Id = "";
+        }
+
+        private void Procedure_DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            Procedure_Label_Name.Visibility = Visibility.Visible;
+            Procedure_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            Procedure_Button_Reduct.IsEnabled = true;
+            Procedure_Button_Ok.IsEnabled = false;
+            Procedure_Button_Cancel.IsEnabled = false;
+
+            var vs = Procedure_DataGrid.SelectedIndex;
+            var row = Procedure_DataGrid.Items[vs] as DataRowView;
+            Procedure_Selected_Id = row?["id"].ToString();
+
+            Procedure_TextBox_Name.Text = row?["Название процедуры"].ToString();
+            Procedure_Label_Name.Content = row?["Название процедуры"].ToString();
+        }
+
+        private void Procedure_Button_Reduct_Click(object sender, RoutedEventArgs e)
+        {
+            if (Procedure_Selected_Id == String.Empty)
+                return;
+            Procedure_Label_Name.Visibility = Visibility.Collapsed;
+            Procedure_TextBox_Name.Visibility = Visibility.Visible;
+
+            Procedure_Button_Reduct.IsEnabled = false;
+            Procedure_Button_Ok.IsEnabled = true;
+            Procedure_Button_Cancel.IsEnabled = true;
+
+            Procedure_TextBox_Name.Text = Procedure_Label_Name.Content.ToString();
+        }
+
+        private void Procedure_Button_Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            Procedure_Label_Name.Visibility = Visibility.Visible;
+            Procedure_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            Procedure_Button_Reduct.IsEnabled = true;
+            Procedure_Button_Ok.IsEnabled = false;
+            Procedure_Button_Cancel.IsEnabled = false;
+        }
+
+        private async void Procedure_Button_Ok_Click(object sender, RoutedEventArgs e)
+        {
+            Procedure_Label_Name.Visibility = Visibility.Visible;
+            Procedure_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            Procedure_Button_Reduct.IsEnabled = true;
+            Procedure_Button_Ok.IsEnabled = false;
+            Procedure_Button_Cancel.IsEnabled = false;
+            string sql;
+            if (Procedure_Selected_Id == "")
+            {
+                sql = $"Insert Into \"Procedure\" (\"Procedure_Name\") Values ('{Procedure_TextBox_Name.Text}')";
+            }
+            else
+            {
+                sql = $"Update \"Procedure\" Set \"Procedure_Name\" = '{Procedure_TextBox_Name.Text}' Where \"Procedure_Id\" = {Procedure_Selected_Id}";
+            }
+
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await conn.OpenAsync();
+                await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+
+            Procedure_MenuItem_Refresh_Click(sender, e);
+            Procedure_Label_Name.Content = Procedure_TextBox_Name.Text;
+        }
+
+        private async void Procedure_Button_SearchData_Click(object sender, RoutedEventArgs e)
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await conn.OpenAsync();
+                String sql = $"Select * From \"Procedure\" Where lower(\"Procedure_Name\") Like '%{Procedure_TextBox_SearchData.Text}%'";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "id", "Procedure_Id" },
+                    { "Название процедуры", "Procedure_Name" }
+                });
+
+                this.Procedure_DataGrid.ItemsSource = new DataView(dt);
+                this.Procedure_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+        }
+
+        #endregion
     }
 }
