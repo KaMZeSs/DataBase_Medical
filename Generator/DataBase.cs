@@ -637,17 +637,32 @@ namespace Generator
 
             var Sequences = new Dictionary<string, string>()
             {
-                { "Category", $"ALTER SEQUENCE \"Category_Category_Id_seq\" RESTART WITH {this.Categories.Length + 1}" },
-                { "Disease", $"ALTER SEQUENCE \"Disease_Disease_Id_seq\" RESTART WITH {this.Diseases.Length + 1}" },
-                { "JobTitle", $"ALTER SEQUENCE \"JobTitle_JobTitle_Id_seq\" RESTART WITH  {this.JobTitles.Length + 1}" },
-                { "Procedure", $"ALTER SEQUENCE \"Procedure_procedure_id_seq\" RESTART WITH  {this.Procedures.Length + 1}" },
-                { "SocialStatus", $"ALTER SEQUENCE \"SocialStatus_SocialStatus_id_seq\" RESTART WITH  {this.SocialStatuses.Length + 1}" },
-                { "Department", $"ALTER SEQUENCE \"Department_Department_id_seq\" RESTART WITH {this.Departments.Length + 1}" },
-                { "Staff", $"ALTER SEQUENCE \"Staff_Staff_id_seq\" RESTART WITH  {this.Staff_list.Length + 1}" },
-                { "Patient", $"ALTER SEQUENCE \"Patient_Patient_Id_seq\" RESTART WITH  {this.Patients.Length + 1}" },
-                { "PatientDiseases", $"ALTER SEQUENCE \"PatientDeceases_PatientDeceases_Id_seq\" RESTART WITH  {this.PatientDiseases_list.Length + 1}" },
-                { "HospitalStay", $"ALTER SEQUENCE \"HospitalStay_HospitalStay_Id_seq\" RESTART WITH  {this.HospitalStays.Length + 1}" },
-                { "DoctorAppointment", $"ALTER SEQUENCE \"DoctorAppointment_DoctorAppointment_Id_seq\" RESTART WITH  {this.DoctorAppointments.Length + 1}" }
+                { "Category", $"ALTER SEQUENCE \"Category_Category_Id_seq\" RESTART WITH {this.Categories.Length}" },
+                { "Disease", $"ALTER SEQUENCE \"Disease_Disease_Id_seq\" RESTART WITH {this.Diseases.Length}" },
+                { "JobTitle", $"ALTER SEQUENCE \"JobTitle_JobTitle_Id_seq\" RESTART WITH  {this.JobTitles.Length}" },
+                { "Procedure", $"ALTER SEQUENCE \"Procedure_procedure_id_seq\" RESTART WITH  {this.Procedures.Length}" },
+                { "SocialStatus", $"ALTER SEQUENCE \"SocialStatus_SocialStatus_id_seq\" RESTART WITH  {this.SocialStatuses.Length}" },
+                { "Department", $"ALTER SEQUENCE \"Department_Department_id_seq\" RESTART WITH {this.Departments.Length}" },
+                { "Staff", $"ALTER SEQUENCE \"Staff_Staff_id_seq\" RESTART WITH  {this.Staff_list.Length}" },
+                { "Patient", $"ALTER SEQUENCE \"Patient_Patient_Id_seq\" RESTART WITH  {this.Patients.Length}" },
+                { "PatientDiseases", $"ALTER SEQUENCE \"PatientDeceases_PatientDeceases_Id_seq\" RESTART WITH  {this.PatientDiseases_list.Length}" },
+                { "HospitalStay", $"ALTER SEQUENCE \"HospitalStay_HospitalStay_Id_seq\" RESTART WITH  {this.HospitalStays.Length}" },
+                { "DoctorAppointment", $"ALTER SEQUENCE \"DoctorAppointment_DoctorAppointment_Id_seq\" RESTART WITH  {this.DoctorAppointments.Length}" }
+            };
+
+            var Sequences_next = new Dictionary<string, string>()
+            {
+                { "Category", "Select nextval ('\"Category_Category_Id_seq\"')" },
+                { "Disease", "Select nextval ('\"Disease_Disease_Id_seq\"')" },
+                { "JobTitle", "Select nextval ('\"JobTitle_JobTitle_Id_seq\"')" },
+                { "Procedure", "Select nextval ('\"Procedure_procedure_id_seq\"')" },
+                { "SocialStatus", "Select nextval ('\"SocialStatus_SocialStatus_id_seq\"')" },
+                { "Department", "Select nextval ('\"Department_Department_id_seq\"')" },
+                { "Staff", "Select nextval ('\"Staff_Staff_id_seq\"')" },
+                { "Patient", "Select nextval ('\"Patient_Patient_Id_seq\"')" },
+                { "PatientDiseases", "Select nextval ('\"PatientDeceases_PatientDeceases_Id_seq\"')" },
+                { "HospitalStay", "Select nextval ('\"HospitalStay_HospitalStay_Id_seq\"')" },
+                { "DoctorAppointment", "Select nextval ('\"DoctorAppointment_DoctorAppointment_Id_seq\"')" },
             };
 
             try
@@ -737,15 +752,20 @@ namespace Generator
                 Console.WriteLine($"{DateTime.Now}: Выполнение команд для DoctorAppointment");
                 new NpgsqlCommand(sql, conn).ExecuteNonQuery();
 
-                Console.WriteLine($"{DateTime.Now}: Создание пользователей в БД");
-                sql = "Select " + String.Join(", ",
-                    this.Staff_list.Select(x => $"create_user('{x.staff_login}', '{x.staff_login}')"));
-                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
-                sql = $"Select grant_user_admin(\'{this.Staff_list[1].staff_login}\')";
-                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+                //Console.WriteLine($"{DateTime.Now}: Создание пользователей в БД");
+                //sql = "Select " + String.Join(", ",
+                //    this.Staff_list.Select(x => $"create_user('{x.staff_login}', '{x.staff_login}')"));
+                //new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+                //sql = $"Select grant_user_admin(\'{this.Staff_list[1].staff_login}\')";
+                //new NpgsqlCommand(sql, conn).ExecuteNonQuery();
 
                 Console.WriteLine($"{DateTime.Now}: Выполнение команд для перестановки перечеслений");
                 foreach (var line in Sequences.Values)
+                {
+                    cmd = new NpgsqlCommand(line, conn);
+                    cmd.ExecuteNonQuery();
+                }
+                foreach (var line in Sequences_next.Values)
                 {
                     cmd = new NpgsqlCommand(line, conn);
                     cmd.ExecuteNonQuery();

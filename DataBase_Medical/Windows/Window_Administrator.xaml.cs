@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
@@ -34,7 +35,7 @@ namespace DataBase_Medical.Windows
             this.Title = "Администратор: " + await ConnectionCarrier.Carrier.GetCurrentFIO();
         }
 
-        private void MenuItem_Click(object sender, RoutedEventArgs e)
+        private async void MenuItem_Click(object sender, RoutedEventArgs e)
         {
             this.Grid_Patient.Visibility = this.Grid_Staff.Visibility = this.Grid_Department.Visibility =
                 this.Grid_Disease.Visibility = this.Grid_Procedure.Visibility =
@@ -61,24 +62,33 @@ namespace DataBase_Medical.Windows
                 case "Заболевания":
                 {
                     this.Grid_Disease.Visibility = Visibility.Visible;
+                    Disease_MenuItem_Refresh_Click(sender, e);
+                    await ConnectionCarrier.Carrier.WaitTillNotOpen();
+                    RaiseFirstSelection(Disease_DataGrid);
                     break;
                 }
                 case "Процедуры":
                 {
                     this.Grid_Procedure.Visibility = Visibility.Visible;
                     Procedure_MenuItem_Refresh_Click(sender, e);
+                    await ConnectionCarrier.Carrier.WaitTillNotOpen();
+                    RaiseFirstSelection(Procedure_DataGrid);
                     break;
                 }
                 case "Социальное положение":
                 {
                     this.Grid_SocialStatus.Visibility = Visibility.Visible;
                     SocialStatus_MenuItem_Refresh_Click(sender, e);
+                    await ConnectionCarrier.Carrier.WaitTillNotOpen();
+                    RaiseFirstSelection(SocialStatus_DataGrid);
                     break;
                 }
                 case "Категории":
                 {
                     this.Grid_Category.Visibility = Visibility.Visible;
                     Category_MenuItem_Refresh_Click(sender, e);
+                    await ConnectionCarrier.Carrier.WaitTillNotOpen();
+                    RaiseFirstSelection(Category_DataGrid);
                     break;
                 }
             }
@@ -113,14 +123,30 @@ namespace DataBase_Medical.Windows
 
             return dt;
         }
+        
+        private void RaiseFirstSelection(DataGrid dataGrid)
+        {
+            dataGrid.SelectedIndex = 0;
+        }
 
         #region Category
 
         string? Category_Selected_Id = string.Empty;
+        string? Category_Saved_Id = string.Empty;
 
         private async void Category_MenuItem_Refresh_Click(object sender, RoutedEventArgs e)
         {
-            string? Category_Selected_Id = string.Empty;
+            if (Category_Saved_Id != string.Empty)
+            {
+                Category_Selected_Id = Category_Saved_Id;
+                Category_Saved_Id = string.Empty;
+            }
+            else
+            {
+                Category_Selected_Id = string.Empty;
+                Category_Saved_Id = string.Empty;
+            }
+
             Category_Label_Name.Content = "";
             Category_Label_Name.Visibility = Visibility.Visible;
             Category_TextBox.Visibility = Visibility.Collapsed;
@@ -154,6 +180,8 @@ namespace DataBase_Medical.Windows
             {
                 await conn.CloseAsync();
             }
+
+            RaiseFirstSelection(Category_DataGrid);
         }
 
         private void Category_MenuItem_Search_Click(object sender, RoutedEventArgs e)
@@ -174,7 +202,8 @@ namespace DataBase_Medical.Windows
 
             Category_TextBox.Text = "";
 
-            Category_Selected_Id = "";
+            Category_Saved_Id = Category_Selected_Id;
+            Category_Selected_Id = string.Empty;
         }
 
         private void Category_DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
@@ -192,6 +221,8 @@ namespace DataBase_Medical.Windows
 
             Category_TextBox.Text = row?["Название категории"].ToString();
             Category_Label_Name.Content = row?["Название категории"].ToString();
+
+            Category_Saved_Id = string.Empty;
         }
 
         private void Category_Button_Reduct_Click(object sender, RoutedEventArgs e)
@@ -206,6 +237,8 @@ namespace DataBase_Medical.Windows
             Category_Button_Cancel.IsEnabled = true;
 
             Category_TextBox.Text = Category_Label_Name.Content.ToString();
+
+            Category_Saved_Id = string.Empty;
         }
 
         private void Category_Button_Cancel_Click(object sender, RoutedEventArgs e)
@@ -216,6 +249,12 @@ namespace DataBase_Medical.Windows
             Category_Button_Reduct.IsEnabled = true;
             Category_Button_Ok.IsEnabled = false;
             Category_Button_Cancel.IsEnabled = false;
+
+            if (Category_Saved_Id != string.Empty)
+            {
+                Category_Selected_Id = Category_Saved_Id;
+                Category_Saved_Id = "";
+            }
         }
 
         private async void Category_Button_Ok_Click(object sender, RoutedEventArgs e)
@@ -226,9 +265,11 @@ namespace DataBase_Medical.Windows
             Category_Button_Reduct.IsEnabled = true;
             Category_Button_Ok.IsEnabled = false;
             Category_Button_Cancel.IsEnabled = false;
+
             string sql;
             if (Category_Selected_Id == "")
             {
+                Category_Selected_Id = (await ConnectionCarrier.Carrier.GetCurrentSequenceId("Category")).ToString();
                 sql = $"Insert Into \"Category\" (\"Category_Name\") Values ('{Category_TextBox.Text}')";
             }
             else
@@ -254,6 +295,7 @@ namespace DataBase_Medical.Windows
             }
 
             Category_MenuItem_Refresh_Click(sender, e);
+            
             Category_Label_Name.Content = Category_TextBox.Text;
         }
 
@@ -264,7 +306,7 @@ namespace DataBase_Medical.Windows
             try
             {
                 await conn.OpenAsync();
-                String sql = $"Select * From \"Category\" Where lower(\"Category_Name\") Like '%{Category_TextBox_SearchData.Text}%'";
+                String sql = $"Select * From \"Category\" Where lower(\"Category_Name\") Like '%{Category_TextBox_SearchData.Text.ToLower()}%'";
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
@@ -292,10 +334,21 @@ namespace DataBase_Medical.Windows
         #region SocialStatus
        
         string? SocialStatus_Selected_Id = string.Empty;
+        string? SocialStatus_Saved_Id = string.Empty;
 
         private async void SocialStatus_MenuItem_Refresh_Click(object sender, RoutedEventArgs e)
         {
-            string? SocialStatus_Selected_Id = string.Empty;
+            if (SocialStatus_Saved_Id != string.Empty)
+            {
+                SocialStatus_Selected_Id = SocialStatus_Saved_Id;
+                SocialStatus_Saved_Id = string.Empty;
+            }
+            else
+            {
+                SocialStatus_Selected_Id = string.Empty;
+                SocialStatus_Saved_Id = string.Empty;
+            }
+
             SocialStatus_Label_Name.Content = "";
             SocialStatus_Label_Name.Visibility = Visibility.Visible;
             SocialStatus_TextBox_Name.Visibility = Visibility.Collapsed;
@@ -329,6 +382,8 @@ namespace DataBase_Medical.Windows
             {
                 await conn.CloseAsync();
             }
+
+            RaiseFirstSelection(Category_DataGrid);
         }
 
         private void SocialStatus_MenuItem_Search_Click(object sender, RoutedEventArgs e)
@@ -349,7 +404,8 @@ namespace DataBase_Medical.Windows
 
             SocialStatus_TextBox_Name.Text = "";
 
-            SocialStatus_Selected_Id = "";
+            SocialStatus_Saved_Id = SocialStatus_Selected_Id;
+            SocialStatus_Selected_Id = string.Empty;
         }
 
         private void SocialStatus_DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
@@ -367,6 +423,8 @@ namespace DataBase_Medical.Windows
 
             SocialStatus_TextBox_Name.Text = row?["Название cоциального положения"].ToString();
             SocialStatus_Label_Name.Content = row?["Название cоциального положения"].ToString();
+
+            SocialStatus_Saved_Id = string.Empty;
         }
 
         private void SocialStatus_Button_Reduct_Click(object sender, RoutedEventArgs e)
@@ -381,6 +439,8 @@ namespace DataBase_Medical.Windows
             SocialStatus_Button_Cancel.IsEnabled = true;
 
             SocialStatus_TextBox_Name.Text = SocialStatus_Label_Name.Content.ToString();
+
+            SocialStatus_Saved_Id = string.Empty;
         }
 
         private void SocialStatus_Button_Cancel_Click(object sender, RoutedEventArgs e)
@@ -391,6 +451,12 @@ namespace DataBase_Medical.Windows
             SocialStatus_Button_Reduct.IsEnabled = true;
             SocialStatus_Button_Ok.IsEnabled = false;
             SocialStatus_Button_Cancel.IsEnabled = false;
+
+            if (SocialStatus_Saved_Id != String.Empty)
+            {
+                SocialStatus_Selected_Id = SocialStatus_Saved_Id;
+                SocialStatus_Saved_Id = "";
+            }
         }
 
         private async void SocialStatus_Button_Ok_Click(object sender, RoutedEventArgs e)
@@ -404,6 +470,7 @@ namespace DataBase_Medical.Windows
             string sql;
             if (SocialStatus_Selected_Id == "")
             {
+                SocialStatus_Selected_Id = (await ConnectionCarrier.Carrier.GetCurrentSequenceId("SocialStatus")).ToString();
                 sql = $"Insert Into \"SocialStatus\" (\"SocialStatus_Name\") Values ('{SocialStatus_TextBox_Name.Text}')";
             }
             else
@@ -439,7 +506,7 @@ namespace DataBase_Medical.Windows
             try
             {
                 await conn.OpenAsync();
-                String sql = $"Select * From \"SocialStatus\" Where lower(\"SocialStatus_Name\") Like '%{SocialStatus_TextBox_SearchData.Text}%'";
+                String sql = $"Select * From \"SocialStatus\" Where lower(\"SocialStatus_Name\") Like '%{SocialStatus_TextBox_SearchData.Text.ToLower()}%'";
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
@@ -466,10 +533,21 @@ namespace DataBase_Medical.Windows
         #region Procedure
 
         string? Procedure_Selected_Id = string.Empty;
+        string? Procedure_Saved_Id = string.Empty;
 
         private async void Procedure_MenuItem_Refresh_Click(object sender, RoutedEventArgs e)
         {
-            string? Procedure_Selected_Id = string.Empty;
+            if (Procedure_Saved_Id != string.Empty)
+            {
+                Procedure_Selected_Id = Procedure_Saved_Id;
+                Procedure_Saved_Id = string.Empty;
+            }
+            else
+            {
+                Procedure_Selected_Id = string.Empty;
+                Procedure_Saved_Id = string.Empty;
+            }
+
             Procedure_Label_Name.Content = "";
             Procedure_Label_Name.Visibility = Visibility.Visible;
             Procedure_TextBox_Name.Visibility = Visibility.Collapsed;
@@ -503,6 +581,8 @@ namespace DataBase_Medical.Windows
             {
                 await conn.CloseAsync();
             }
+
+            RaiseFirstSelection(Procedure_DataGrid);
         }
 
         private void Procedure_MenuItem_Search_Click(object sender, RoutedEventArgs e)
@@ -523,7 +603,8 @@ namespace DataBase_Medical.Windows
 
             Procedure_TextBox_Name.Text = "";
 
-            Procedure_Selected_Id = "";
+            Procedure_Saved_Id = Procedure_Selected_Id;
+            Procedure_Selected_Id = string.Empty;
         }
 
         private void Procedure_DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
@@ -541,6 +622,8 @@ namespace DataBase_Medical.Windows
 
             Procedure_TextBox_Name.Text = row?["Название процедуры"].ToString();
             Procedure_Label_Name.Content = row?["Название процедуры"].ToString();
+
+            Procedure_Saved_Id = string.Empty;
         }
 
         private void Procedure_Button_Reduct_Click(object sender, RoutedEventArgs e)
@@ -555,6 +638,8 @@ namespace DataBase_Medical.Windows
             Procedure_Button_Cancel.IsEnabled = true;
 
             Procedure_TextBox_Name.Text = Procedure_Label_Name.Content.ToString();
+
+            Procedure_Saved_Id = string.Empty;
         }
 
         private void Procedure_Button_Cancel_Click(object sender, RoutedEventArgs e)
@@ -565,6 +650,13 @@ namespace DataBase_Medical.Windows
             Procedure_Button_Reduct.IsEnabled = true;
             Procedure_Button_Ok.IsEnabled = false;
             Procedure_Button_Cancel.IsEnabled = false;
+
+            if (Procedure_Saved_Id != string.Empty)
+            {
+                Procedure_Selected_Id = Procedure_Saved_Id;
+                Procedure_Saved_Id = "";
+            }
+                
         }
 
         private async void Procedure_Button_Ok_Click(object sender, RoutedEventArgs e)
@@ -575,9 +667,11 @@ namespace DataBase_Medical.Windows
             Procedure_Button_Reduct.IsEnabled = true;
             Procedure_Button_Ok.IsEnabled = false;
             Procedure_Button_Cancel.IsEnabled = false;
+
             string sql;
             if (Procedure_Selected_Id == "")
             {
+                Procedure_Selected_Id = (await ConnectionCarrier.Carrier.GetCurrentSequenceId("Procedure")).ToString();
                 sql = $"Insert Into \"Procedure\" (\"Procedure_Name\") Values ('{Procedure_TextBox_Name.Text}')";
             }
             else
@@ -603,6 +697,7 @@ namespace DataBase_Medical.Windows
             }
 
             Procedure_MenuItem_Refresh_Click(sender, e);
+
             Procedure_Label_Name.Content = Procedure_TextBox_Name.Text;
         }
 
@@ -613,7 +708,7 @@ namespace DataBase_Medical.Windows
             try
             {
                 await conn.OpenAsync();
-                String sql = $"Select * From \"Procedure\" Where lower(\"Procedure_Name\") Like '%{Procedure_TextBox_SearchData.Text}%'";
+                String sql = $"Select * From \"Procedure\" Where lower(\"Procedure_Name\") Like '%{Procedure_TextBox_SearchData.Text.ToLower()}%'";
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
@@ -624,6 +719,208 @@ namespace DataBase_Medical.Windows
 
                 this.Procedure_DataGrid.ItemsSource = new DataView(dt);
                 this.Procedure_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+        }
+
+        #endregion
+
+        #region Disease
+
+        string? Disease_Selected_Id = string.Empty;
+        string? Disease_Saved_Id = string.Empty;
+
+        private async void Disease_MenuItem_Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            if (Disease_Saved_Id != string.Empty)
+            {
+                Disease_Selected_Id = Disease_Saved_Id;
+                Disease_Saved_Id = string.Empty;
+            }
+            else
+            {
+                Disease_Selected_Id = string.Empty;
+                Disease_Saved_Id = string.Empty;
+            }
+
+            Disease_Label_Name.Content = "";
+            Disease_Label_Name.Visibility = Visibility.Visible;
+            Disease_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            Disease_Button_Reduct.IsEnabled = true;
+            Disease_Button_Ok.IsEnabled = false;
+            Disease_Button_Cancel.IsEnabled = false;
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await conn.OpenAsync();
+                String sql = "Select * From \"Disease\"";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "id", "Disease_Id" },
+                    { "Название заболевания", "Disease_Name" }
+                });
+
+                this.Disease_DataGrid.ItemsSource = new DataView(dt);
+                this.Disease_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+
+            RaiseFirstSelection(Disease_DataGrid);
+        }
+
+        private void Disease_MenuItem_Search_Click(object sender, RoutedEventArgs e)
+        {
+            this.Disease_Grid_Search.Visibility =
+               this.Disease_Grid_Search.Visibility is Visibility.Visible ?
+               Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void Disease_MenuItem_Add_Click(object sender, RoutedEventArgs e)
+        {
+            Disease_Label_Name.Visibility = Visibility.Collapsed;
+            Disease_TextBox_Name.Visibility = Visibility.Visible;
+
+            Disease_Button_Reduct.IsEnabled = false;
+            Disease_Button_Ok.IsEnabled = true;
+            Disease_Button_Cancel.IsEnabled = true;
+
+            Disease_TextBox_Name.Text = "";
+
+            Disease_Saved_Id = Disease_Selected_Id;
+            Disease_Selected_Id = string.Empty;
+        }
+
+        private void Disease_DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            Disease_Label_Name.Visibility = Visibility.Visible;
+            Disease_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            Disease_Button_Reduct.IsEnabled = true;
+            Disease_Button_Ok.IsEnabled = false;
+            Disease_Button_Cancel.IsEnabled = false;
+
+            var vs = Disease_DataGrid.SelectedIndex;
+            var row = Disease_DataGrid.Items[vs] as DataRowView;
+            Disease_Selected_Id = row?["id"].ToString();
+
+            Disease_TextBox_Name.Text = row?["Название заболевания"].ToString();
+            Disease_Label_Name.Content = row?["Название заболевания"].ToString();
+
+            Disease_Saved_Id = string.Empty;
+        }
+
+        private void Disease_Button_Reduct_Click(object sender, RoutedEventArgs e)
+        {
+            if (Disease_Selected_Id == String.Empty)
+                return;
+            Disease_Label_Name.Visibility = Visibility.Collapsed;
+            Disease_TextBox_Name.Visibility = Visibility.Visible;
+
+            Disease_Button_Reduct.IsEnabled = false;
+            Disease_Button_Ok.IsEnabled = true;
+            Disease_Button_Cancel.IsEnabled = true;
+
+            Disease_TextBox_Name.Text = Disease_Label_Name.Content.ToString();
+
+            Disease_Saved_Id = string.Empty;
+        }
+
+        private void Disease_Button_Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            Disease_Label_Name.Visibility = Visibility.Visible;
+            Disease_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            Disease_Button_Reduct.IsEnabled = true;
+            Disease_Button_Ok.IsEnabled = false;
+            Disease_Button_Cancel.IsEnabled = false;
+
+            if (Disease_Saved_Id != string.Empty)
+            {
+                Disease_Selected_Id = Disease_Saved_Id;
+                Disease_Saved_Id = "";
+            }
+
+        }
+
+        private async void Disease_Button_Ok_Click(object sender, RoutedEventArgs e)
+        {
+            Disease_Label_Name.Visibility = Visibility.Visible;
+            Disease_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            Disease_Button_Reduct.IsEnabled = true;
+            Disease_Button_Ok.IsEnabled = false;
+            Disease_Button_Cancel.IsEnabled = false;
+
+            string sql;
+            if (Disease_Selected_Id == "")
+            {
+                Disease_Selected_Id = (await ConnectionCarrier.Carrier.GetCurrentSequenceId("Disease")).ToString();
+                sql = $"Insert Into \"Disease\" (\"Disease_Name\") Values ('{Disease_TextBox_Name.Text}')";
+            }
+            else
+            {
+                sql = $"Update \"Disease\" Set \"Disease_Name\" = '{Disease_TextBox_Name.Text}' Where \"Disease_Id\" = {Disease_Selected_Id}";
+            }
+
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await conn.OpenAsync();
+                await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+
+            Disease_MenuItem_Refresh_Click(sender, e);
+
+            Disease_Label_Name.Content = Disease_TextBox_Name.Text;
+        }
+
+        private async void Disease_Button_SearchData_Click(object sender, RoutedEventArgs e)
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await conn.OpenAsync();
+                String sql = $"Select * From \"Disease\" Where lower(\"Disease_Name\") Like '%{Disease_TextBox_SearchData.Text.ToLower()}%'";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "id", "Disease_Id" },
+                    { "Название заболевания", "Disease_Name" }
+                });
+
+                this.Disease_DataGrid.ItemsSource = new DataView(dt);
+                this.Disease_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
             }
             catch
             {

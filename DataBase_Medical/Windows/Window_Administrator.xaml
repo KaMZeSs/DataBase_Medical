@@ -448,7 +448,7 @@
 
         </Grid> <!--Персонал-->
 
-        <Grid x:Name="Grid_Department" Grid.Row="1" Visibility="Collapsed">
+        <Grid x:Name="Grid_Department" Grid.Row="1" Visibility="Visible">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -507,7 +507,6 @@
                         Название:
                     </Label>
                     <RibbonTextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
-
                     <Button Grid.Row="1" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
                 </Grid>
                 <!--Поиск-->
@@ -515,15 +514,8 @@
                 <DataGrid Grid.Row="3"
                   Style="{StaticResource DataGrid_Style}"
                   CanUserAddRows="False" CanUserDeleteRows="False"
-                  IsReadOnly="True">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn>
-                            <DataGridTextColumn.Header>
-                                Название отделения
-                            </DataGridTextColumn.Header>
-                        </DataGridTextColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                  IsReadOnly="True" />
+
 
             </Grid> <!--Список отделений-->
             
@@ -556,27 +548,21 @@
                     <Label Grid.Row="1" Style="{StaticResource InfoField_Style}">
                         Название:
                     </Label>
-                    <Label Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Травматология
-                    </Label>
+                    <Label Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
                     <RibbonTextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Травматология" />
 
                     <!--Телефон-->
                     <Label Grid.Row="2" Style="{StaticResource InfoField_Style}">
                         Телефон:
                     </Label>
-                    <Label Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        +7(949)-359-45-65  
-                    </Label>
+                    <Label Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
                     <RibbonTextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="+7(949)-359-45-65 " />
 
                     <!--Число коек-->
                     <Label Grid.Row="3" Style="{StaticResource InfoField_Style}">
                         Число коек:
                     </Label>
-                    <Label Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        35
-                    </Label>
+                    <Label Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
                     <RibbonTextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="35" />
 
                     <!--Кнопки редактирования, подтверждения редактирования и его отмены-->
@@ -615,24 +601,24 @@
                 </Grid.RowDefinitions>
 
                 <Menu Grid.Row="1" Style="{StaticResource Menu_Style}">
-                    <MenuItem>
+                    <MenuItem Click="Disease_MenuItem_Refresh_Click">
                         <MenuItem.Header>
                             <materialDesign:PackIcon Kind="Refresh" Height="19" Width="19"/>
                         </MenuItem.Header>
                     </MenuItem>
-                    <MenuItem>
+                    <MenuItem Click="Disease_MenuItem_Search_Click">
                         <MenuItem.Header>
                             <materialDesign:PackIcon Kind="Search" Height="19" Width="19"/>
                         </MenuItem.Header>
                     </MenuItem>
-                    <MenuItem>
+                    <MenuItem Click="Disease_MenuItem_Add_Click">
                         <MenuItem.Header>
                             <materialDesign:PackIcon Kind="Add" Height="22" Width="22"/>
                         </MenuItem.Header>
                     </MenuItem>
                 </Menu>
 
-                <Grid Grid.Row="2" Visibility="Collapsed">
+                <Grid x:Name="Disease_Grid_Search" Grid.Row="2" Visibility="Collapsed">
                     <!--Инфа для поиска-->
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -647,24 +633,19 @@
                     <Label Grid.Row="0" Style="{StaticResource InfoField_Style}" FontSize="12">
                         Название:
                     </Label>
-                    <RibbonTextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
+                    <RibbonTextBox Name="Disease_TextBox_SearchData" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
 
-                    <Button Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
+                    <Button Name="Disease_Button_SearchData" Click="Disease_Button_SearchData_Click" Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
                 </Grid>
                 <!--Поиск-->
 
-                <DataGrid Grid.Row="3"
-                  Style="{StaticResource DataGrid_Style}"
-                  CanUserAddRows="False" CanUserDeleteRows="False"
-                  IsReadOnly="True">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn>
-                            <DataGridTextColumn.Header>
-                                Название заболевания
-                            </DataGridTextColumn.Header>
-                        </DataGridTextColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <DataGrid Grid.Row="3" x:Name="Disease_DataGrid"
+                      Style="{StaticResource DataGrid_Style}"
+                      CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
+                      SelectedCellsChanged="Disease_DataGrid_SelectedCellsChanged"
+                      
+                      IsReadOnly="True"/>
+
 
                 <Label Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource InfoTitle_Style}" FontSize="20">
                     Список заболеваний
@@ -672,7 +653,6 @@
 
             </Grid> <!--Список болезней-->
            
-
             <Grid Grid.Column="1" Margin="20, 0, 20, 0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
@@ -683,8 +663,8 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="60" />
                         <RowDefinition Height="50" />
-                        <RowDefinition Height="50" />
-                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="50"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -700,21 +680,25 @@
                     <Label Grid.Row="1" Style="{StaticResource InfoField_Style}">
                         Название:
                     </Label>
-                    <Label Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Грипп
-                    </Label>
-                    <RibbonTextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Грипп" />
+                    <Label Name="Disease_Label_Name" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible"/>
+                    <RibbonTextBox Name="Disease_TextBox_Name" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Грипп" />
 
                     <!--Кнопки редактирования, подтверждения редактирования и его отмены-->
-                    <Grid Grid.Row="2" Grid.ColumnSpan="2" Visibility="Visible">
+                    <Grid Grid.Row="3" Grid.ColumnSpan="2" Visibility="Visible">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                             <ColumnDefinition></ColumnDefinition>
                             <ColumnDefinition></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="Редактировать" Style="{StaticResource Button_Style}" IsEnabled="True"/>
-                        <Button Grid.Column="1" Content="Отмена" Style="{StaticResource Button_Style}" IsEnabled="False"/>
-                        <Button Grid.Column="2" Content="Ок" Style="{StaticResource Button_Style}" IsEnabled="False"/>
+                        <Button x:Name="Disease_Button_Reduct" Grid.Column="0" Content="Редактировать" 
+                                Style="{StaticResource Button_Style}" IsEnabled="True"
+                                Click="Disease_Button_Reduct_Click"/>
+                        <Button x:Name="Disease_Button_Cancel" Grid.Column="1" Content="Отмена" 
+                                Style="{StaticResource Button_Style}" IsEnabled="False"
+                                Click="Disease_Button_Cancel_Click"/>
+                        <Button x:Name="Disease_Button_Ok" Grid.Column="2" Content="Ок" 
+                                Style="{StaticResource Button_Style}" IsEnabled="False"
+                                Click="Disease_Button_Ok_Click"/>
                     </Grid>
 
                 </Grid>
