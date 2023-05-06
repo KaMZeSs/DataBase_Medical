@@ -35,7 +35,26 @@ namespace DataBase_Medical.Windows
 
         private NpgsqlConnection _connection;
 
-        public NpgsqlConnection Connection { get { return _connection; } }
+        public NpgsqlConnection Connection
+        {
+            get
+            {
+                return _connection;
+            }
+        }
+
+        public async Task OpenConnectionAsyncSave()
+        {
+            while (_connection.State is not ConnectionState.Closed)
+                await Task.Run(() => Thread.Sleep(20));
+            await _connection.OpenAsync();
+        }
+
+        public async Task WaitForConnectionAsync()
+        {
+            while (_connection.State is not ConnectionState.Closed)
+                await Task.Run(() => Thread.Sleep(20));
+        }
 
         public ConnectionCarrier(String login, String password,
             String host= "localhost", int port = 5432, String dataBase = "postgres")
@@ -46,19 +65,13 @@ namespace DataBase_Medical.Windows
             _connection = new NpgsqlConnection(connectString);
         }
 
-        public async Task WaitTillNotOpen()
-        {
-            while (ConnectionCarrier.Carrier.Connection.State is ConnectionState.Open)
-                await Task.Run(() => Thread.Sleep(20));
-        }
-
         public async Task<String> GetCurrentJob()
         {
             var str = String.Empty;
             try
             {
                 await _connection.OpenAsync();
-                String sql = "Select * From CurrentStaff_JobName";
+                String sql = "Select * From \"CurrentStaff_Role\"";
                 var reader = await new NpgsqlCommand(sql, _connection).ExecuteReaderAsync();
                 await reader.ReadAsync();
                 str = reader.GetString(0);
@@ -72,7 +85,29 @@ namespace DataBase_Medical.Windows
                 await _connection.CloseAsync();
             }
 
-            return str;
+            switch (str)
+            {
+                case "admin":
+                {
+                    return "Администратор";
+                }
+                case "chief":
+                {
+                    return "Главный врач";
+                }
+                case "department_chief":
+                {
+                    return "Заведующий отделением";
+                }
+                case "doctor":
+                {
+                    return "Врач";
+                }
+                default:
+                {
+                    throw new NotImplementedException();
+                }
+            }
         }
 
         public async Task<String> GetCurrentFIO()
@@ -111,11 +146,6 @@ namespace DataBase_Medical.Windows
                 case "Disease":
                 {
                     sequence_name = "Disease_Disease_Id_seq";
-                    break;
-                }
-                case "JobTitle":
-                {
-                    sequence_name = "JobTitle_JobTitle_Id_seq";
                     break;
                 }
                 case "Procedure":

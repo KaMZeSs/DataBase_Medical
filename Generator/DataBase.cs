@@ -234,11 +234,12 @@ namespace Generator
                 var rnd_date = DateOnly.FromDateTime(StaticMethods<object>
                         .GetRandomDateInRange(new DateTime(1960, 1, 1), DateTime.Now));
                 var fio = PartOfName.GenerateFIO(firstNames, midNames, lastNames);
-                var login = StaticMethods<object>.GenerateRandomString(12);
-                while (staff_list.Where(x => x.staff_login == login).Any())
-                {
-                    login = StaticMethods<object>.GenerateRandomString(12);
-                }
+                var login = "chief";
+                //var login = StaticMethods<object>.GenerateRandomString(12);
+                //while (staff_list.Where(x => x.staff_login == login).Any())
+                //{
+                //    login = StaticMethods<object>.GenerateRandomString(12);
+                //}
                 staff_list.Add(new Staff
                 {
                     staff_id = index,
@@ -258,16 +259,12 @@ namespace Generator
                 rnd_date = DateOnly.FromDateTime(StaticMethods<object>
                         .GetRandomDateInRange(new DateTime(1960, 1, 1), DateTime.Now));
                 fio = PartOfName.GenerateFIO(firstNames, midNames, lastNames);
-                login = StaticMethods<object>.GenerateRandomString(12);
-                while (staff_list.Where(x => x.staff_login == login).Any())
-                {
-                    login = StaticMethods<object>.GenerateRandomString(12);
-                }
+                login = "admin";
                 staff_list.Add(new Staff
                 {
                     staff_id = index,
                     staff_Department_id = -1,
-                    staff_Category_id = categories.Where(x => x.category_name == "Нет").First().category_id,
+                    staff_Category_id = -1,
                     staff_JobTitle_id = jobTitles.Where(x => x.jobTitle_name == "Администратор").First().jobTitle_id,
                     staff_EmploymentDate = rnd_date,
                     staff_Salary = rnd.Next(15000, 50000),
@@ -285,11 +282,12 @@ namespace Generator
                         rnd_date = DateOnly.FromDateTime(StaticMethods<object>
                             .GetRandomDateInRange(new DateTime(1960, 1, 1), DateTime.Now));
                         fio = PartOfName.GenerateFIO(firstNames, midNames, lastNames);
-                        login = StaticMethods<object>.GenerateRandomString(12);
-                        while (staff_list.Where(x => x.staff_login == login).Any())
-                        {
-                            login = StaticMethods<object>.GenerateRandomString(12);
-                        }
+                        login = $"doctor_{department.department_id}_{i}";
+                        //login = StaticMethods<object>.GenerateRandomString(12);
+                        //while (staff_list.Where(x => x.staff_login == login).Any())
+                        //{
+                        //    login = StaticMethods<object>.GenerateRandomString(12);
+                        //}
                         staff_list.Add(new Staff
                         {
                             staff_id = index,
@@ -309,11 +307,12 @@ namespace Generator
                     rnd_date = DateOnly.FromDateTime(StaticMethods<object>
                             .GetRandomDateInRange(new DateTime(1960, 1, 1), DateTime.Now));
                     fio = PartOfName.GenerateFIO(firstNames, midNames, lastNames);
-                    login = StaticMethods<object>.GenerateRandomString(12);
-                    while (staff_list.Where(x => x.staff_login == login).Any())
-                    {
-                        login = StaticMethods<object>.GenerateRandomString(12);
-                    }
+                    login = $"doctor_{department.department_id}";
+                    //login = StaticMethods<object>.GenerateRandomString(12);
+                    //while (staff_list.Where(x => x.staff_login == login).Any())
+                    //{
+                    //    login = StaticMethods<object>.GenerateRandomString(12);
+                    //}
                     staff_list.Add(new Staff
                     {
                         staff_id = index,
@@ -335,14 +334,9 @@ namespace Generator
 
             public override string ToString()
             {
-                if (staff_Department_id is -1)
-                {
-                    return $"({staff_id + 1}, \'{staff_Name}\', '{staff_Surname}', '{staff_Patronymic}', NULL, {staff_Category_id + 1}, \'{staff_EmploymentDate:dd-MM-yyyy}\', {staff_Salary}, {staff_JobTitle_id + 1}, \'{staff_login}\')";
-                }
-                else
-                {
-                    return $"({staff_id + 1}, \'{staff_Name}\', '{staff_Surname}', '{staff_Patronymic}', {staff_Department_id + 1}, {staff_Category_id + 1}, \'{staff_EmploymentDate:dd-MM-yyyy}\', {staff_Salary}, {staff_JobTitle_id + 1}, \'{staff_login}\')";
-                }
+                String department = staff_Department_id is -1 ? "NULL" : (staff_Department_id + 1).ToString();
+                String category = staff_Category_id is -1 ? "NULL" : (staff_Category_id + 1).ToString();
+                return $"({staff_id + 1}, \'{staff_Name}\', '{staff_Surname}', '{staff_Patronymic}', {department}, {category}, \'{staff_EmploymentDate:dd-MM-yyyy}\', {staff_Salary}, \'{staff_login}\')";
             }
         }
 
@@ -461,22 +455,45 @@ namespace Generator
 
                 foreach (var patient in patients)
                 {
+                    var last_max = patient.patient_Birthday;
                     for (int i = 0; i < count_per_patient; i++)
                     {
                         var dep = departments[rnd.Next(departments.Length)];
-                        var start = StaticMethods<int>.GetRandomDateInRange(patient.patient_Birthday.ToDateTime(TimeOnly.MinValue), DateTime.Now);
+
+                        var start = StaticMethods<int>.GetRandomDateInRange(
+                            last_max.ToDateTime(TimeOnly.MinValue), 
+                            DateTime.Now);
                         var end = DateOnly.FromDateTime(
-                                StaticMethods<int>.GetRandomDateInRange(start, DateTime.Now));
-                        var c = hospitalStays.Where(x => x.hospitalStay_Department_id == dep.department_id).Count();
-                        hospitalStays.Add(new HospitalStay()
+                                StaticMethods<int>.GetRandomDateInRange(
+                                    start, 
+                                    DateTime.Now));
+                        last_max = end;
+
+                        if (i + 1 == count_per_patient)
                         {
-                            hospitalStay_id = hospitalStays.Count,
-                            hospitalStay_Patient_id = patient.patient_id,
-                            hospitalStay_Department_id = dep.department_id,
-                            hospitalStay_Cost = rnd.Next(10000),
-                            hospitalStay_Start_Date = DateOnly.FromDateTime(start),
-                            hospitalStay_End_Date = c < dep.department_beds ? end : DateOnly.MinValue
-                        });
+                            var c = hospitalStays.Where(x => x.hospitalStay_Department_id == dep.department_id).Count();
+                            hospitalStays.Add(new HospitalStay()
+                            {
+                                hospitalStay_id = hospitalStays.Count,
+                                hospitalStay_Patient_id = patient.patient_id,
+                                hospitalStay_Department_id = dep.department_id,
+                                hospitalStay_Cost = rnd.Next(10000),
+                                hospitalStay_Start_Date = DateOnly.FromDateTime(start),
+                                hospitalStay_End_Date = c < dep.department_beds ? DateOnly.MinValue : end
+                            });
+                        }
+                        else
+                        {
+                            hospitalStays.Add(new HospitalStay()
+                            {
+                                hospitalStay_id = hospitalStays.Count,
+                                hospitalStay_Patient_id = patient.patient_id,
+                                hospitalStay_Department_id = dep.department_id,
+                                hospitalStay_Cost = rnd.Next(10000),
+                                hospitalStay_Start_Date = DateOnly.FromDateTime(start),
+                                hospitalStay_End_Date = end
+                            });
+                        }
                     }
                 }
 
@@ -615,7 +632,6 @@ namespace Generator
                 "DELETE FROM \"Department\"",
                 "DELETE FROM \"SocialStatus\"",
                 "DELETE FROM \"Procedure\"",
-                "DELETE FROM \"JobTitle\"",
                 "DELETE FROM \"Disease\"",
                 "DELETE FROM \"Category\""
             };
@@ -624,11 +640,10 @@ namespace Generator
             {
                 { "Category", "INSERT INTO \"Category\" (\"Category_Id\", \"Category_Name\") VALUES " },
                 { "Disease", "INSERT INTO \"Disease\" (\"Disease_Id\", \"Disease_Name\") VALUES " },
-                { "JobTitle", "INSERT INTO \"JobTitle\" (\"JobTitle_Id\", \"JobTitle_Name\") VALUES " },
                 { "Procedure", "INSERT INTO \"Procedure\" (\"Procedure_Id\", \"Procedure_Name\") VALUES " },
                 { "SocialStatus", "INSERT INTO \"SocialStatus\" (\"SocialStatus_Id\", \"SocialStatus_Name\") VALUES " },
                 { "Department", "INSERT INTO \"Department\" (\"Department_Id\", \"Department_Name\", \"Department_Beds\", \"Department_Phone\", \"Department_Exists\") VALUES " },
-                { "Staff", "INSERT INTO \"Staff\" (\"Staff_Id\", \"Staff_Name\", \"Staff_Surname\", \"Staff_Patronymic\", \"Staff_Department_Id\", \"Staff_Category_Id\", \"Staff_EmploymentDate\", \"Staff_Salary\", \"Staff_JobTitle_Id\", \"Staff_Login\") VALUES " },
+                { "Staff", "INSERT INTO \"Staff\" (\"Staff_Id\", \"Staff_Name\", \"Staff_Surname\", \"Staff_Patronymic\", \"Staff_Department_Id\", \"Staff_Category_Id\", \"Staff_EmploymentDate\", \"Staff_Salary\", \"Staff_Login\") VALUES " },
                 { "Patient", "INSERT INTO \"Patient\" (\"Patient_Id\", \"Patient_Name\", \"Patient_Surname\", \"Patient_Patronymic\", \"Patient_BirthDay\", \"Patient_SocialStatus_Id\", \"Patient_CurrentDoctor_Id\") VALUES " },
                 { "PatientDiseases", "INSERT INTO \"PatientDiseases\" (\"PatientDiseases_Id\", \"PatientDiseases_Patient_Id\", \"PatientDiseases_Disease_Id\", \"PatientDiseases_Start_Date\", \"PatientDiseases_End_Date\") VALUES " },
                 { "HospitalStay", "INSERT INTO \"HospitalStay\" (\"HospitalStay_Id\", \"HospitalStay_Patient_Id\", \"HospitalStay_Start_Date\", \"HospitalStay_End_Date\", \"HospitalStay_Cost\", \"HospitalStay_Department_Id\") VALUES " },
@@ -639,7 +654,6 @@ namespace Generator
             {
                 { "Category", $"ALTER SEQUENCE \"Category_Category_Id_seq\" RESTART WITH {this.Categories.Length}" },
                 { "Disease", $"ALTER SEQUENCE \"Disease_Disease_Id_seq\" RESTART WITH {this.Diseases.Length}" },
-                { "JobTitle", $"ALTER SEQUENCE \"JobTitle_JobTitle_Id_seq\" RESTART WITH  {this.JobTitles.Length}" },
                 { "Procedure", $"ALTER SEQUENCE \"Procedure_procedure_id_seq\" RESTART WITH  {this.Procedures.Length}" },
                 { "SocialStatus", $"ALTER SEQUENCE \"SocialStatus_SocialStatus_id_seq\" RESTART WITH  {this.SocialStatuses.Length}" },
                 { "Department", $"ALTER SEQUENCE \"Department_Department_id_seq\" RESTART WITH {this.Departments.Length}" },
@@ -654,7 +668,6 @@ namespace Generator
             {
                 { "Category", "Select nextval ('\"Category_Category_Id_seq\"')" },
                 { "Disease", "Select nextval ('\"Disease_Disease_Id_seq\"')" },
-                { "JobTitle", "Select nextval ('\"JobTitle_JobTitle_Id_seq\"')" },
                 { "Procedure", "Select nextval ('\"Procedure_procedure_id_seq\"')" },
                 { "SocialStatus", "Select nextval ('\"SocialStatus_SocialStatus_id_seq\"')" },
                 { "Department", "Select nextval ('\"Department_Department_id_seq\"')" },
@@ -707,11 +720,6 @@ namespace Generator
                 Console.WriteLine($"{DateTime.Now}: Выполнение команд для Disease");
                 new NpgsqlCommand(sql, conn).ExecuteNonQuery();
 
-                Console.WriteLine($"{DateTime.Now}: Генерация команд для JobTitle");
-                sql = firstParts["JobTitle"] + String.Join(",\n", this.JobTitles.Select(x => x.ToString()).ToArray());
-                Console.WriteLine($"{DateTime.Now}: Выполнение команд для JobTitle");
-                new NpgsqlCommand(sql, conn).ExecuteNonQuery();
-
                 Console.WriteLine($"{DateTime.Now}: Генерация команд для Procedure");
                 sql = firstParts["Procedure"] + String.Join(",\n", this.Procedures.Select(x => x.ToString()).ToArray());
                 Console.WriteLine($"{DateTime.Now}: Выполнение команд для Procedure");
@@ -752,12 +760,14 @@ namespace Generator
                 Console.WriteLine($"{DateTime.Now}: Выполнение команд для DoctorAppointment");
                 new NpgsqlCommand(sql, conn).ExecuteNonQuery();
 
-                //Console.WriteLine($"{DateTime.Now}: Создание пользователей в БД");
-                //sql = "Select " + String.Join(", ",
-                //    this.Staff_list.Select(x => $"create_user('{x.staff_login}', '{x.staff_login}')"));
-                //new NpgsqlCommand(sql, conn).ExecuteNonQuery();
-                //sql = $"Select grant_user_admin(\'{this.Staff_list[1].staff_login}\')";
-                //new NpgsqlCommand(sql, conn).ExecuteNonQuery();
+                Console.WriteLine($"{DateTime.Now}: Генерация команд для назначения должностей");
+                sql = String.Join("\n", this.Staff_list.Where(x => x.staff_JobTitle_id is 0).Select(x => $"CALL add_user_to_chiefs_group('{x.staff_login}');")) + 
+                    String.Join("\n", this.Staff_list.Where(x => x.staff_JobTitle_id is 1).Select(x => $"CALL add_user_to_department_chiefs_group('{x.staff_login}');")) +
+                    String.Join("\n", this.Staff_list.Where(x => x.staff_JobTitle_id is 2).Select(x => $"CALL add_user_to_doctors_group('{x.staff_login}');")) +
+                    String.Join("\n", this.Staff_list.Where(x => x.staff_JobTitle_id is 3).Select(x => $"CALL add_user_to_admins_group('{x.staff_login}');"));
+                Console.WriteLine($"{DateTime.Now}: Выполнение команд для назначения должностей");
+                cmd = new NpgsqlCommand(sql, conn);
+                cmd.ExecuteNonQuery();
 
                 Console.WriteLine($"{DateTime.Now}: Выполнение команд для перестановки перечеслений");
                 foreach (var line in Sequences.Values)
