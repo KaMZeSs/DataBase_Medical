@@ -160,13 +160,19 @@ namespace DataBase_Medical.Windows
             return result;
         }
 
-        private List<String> NpgsqlDataReader_To_List(NpgsqlDataReader reader, String column_name)
+        private Dictionary<String, String> NpgsqlDataReader_To_DictionaryList(NpgsqlDataReader reader, String column_key, String column_value)
         {
-            List<String> result = new();
-            reader.Read();
+            Dictionary<String, String> result = new();
+            DataTable dt = new DataTable();
+            dt.Columns.Add(column_key);
+            dt.Columns.Add(column_value);
             while (reader.Read())
             {
-                result.Add(reader[column_name].ToString());
+                DataRow dataRow = dt.NewRow();
+                dataRow[column_key] = reader[column_key];
+                dataRow[column_value] = reader[column_value];
+
+                result.Add(dataRow[column_key].ToString(), dataRow[column_value].ToString());
             }
 
             return result;
@@ -176,6 +182,8 @@ namespace DataBase_Medical.Windows
         {
             dataGrid.SelectedIndex = 0;
         }
+
+        bool isReducting = false;
 
         #region Category
 
@@ -264,6 +272,7 @@ namespace DataBase_Medical.Windows
 
         private void Category_MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
+            isReducting = false;
             Category_Label_Name.Visibility = Visibility.Collapsed;
             Category_TextBox_Name.Visibility = Visibility.Visible;
 
@@ -294,6 +303,7 @@ namespace DataBase_Medical.Windows
 
         private void Category_Button_Reduct_Click(object sender, RoutedEventArgs e)
         {
+            isReducting = true;
             if (Category_Selected_Id == String.Empty)
                 return;
 
@@ -319,6 +329,13 @@ namespace DataBase_Medical.Windows
 
         private async void Category_Button_Ok_Click(object sender, RoutedEventArgs e)
         {
+            if (Category_TextBox_Name.Text.Length is 0)
+            {
+                MessageBox.Show($"Название не может быть пустым",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             Category_Label_Name.Visibility = Visibility.Visible;
             Category_TextBox_Name.Visibility = Visibility.Collapsed;
 
@@ -327,7 +344,7 @@ namespace DataBase_Medical.Windows
             Category_Button_Cancel.IsEnabled = false;
 
             string sql;
-            if (Category_Selected_Id == "")
+            if (!isReducting)
             {
                 Category_Selected_Id = (await ConnectionCarrier.Carrier.GetCurrentSequenceId("Category")).ToString();
                 sql = $"Insert Into \"Category\" (\"Category_Name\") Values ('{Category_TextBox_Name.Text}')";
@@ -347,9 +364,13 @@ namespace DataBase_Medical.Windows
 
                 Category_Label_Name.Content = Category_TextBox_Name.Text;
             }
-            catch
+            catch (Exception ex)
             {
-
+                if (ex.Message.Contains("повторяющееся"))
+                {
+                    MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             finally
             {
@@ -478,6 +499,7 @@ namespace DataBase_Medical.Windows
 
         private void SocialStatus_MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
+            isReducting = false;
             SocialStatus_Label_Name.Visibility = Visibility.Collapsed;
             SocialStatus_TextBox_Name.Visibility = Visibility.Visible;
 
@@ -511,6 +533,8 @@ namespace DataBase_Medical.Windows
             if (SocialStatus_Selected_Id == String.Empty)
                 return;
 
+            isReducting = true;
+
             SocialStatus_Label_Name.Visibility = Visibility.Collapsed;
             SocialStatus_TextBox_Name.Visibility = Visibility.Visible;
 
@@ -533,6 +557,13 @@ namespace DataBase_Medical.Windows
 
         private async void SocialStatus_Button_Ok_Click(object sender, RoutedEventArgs e)
         {
+            if (SocialStatus_TextBox_Name.Text.Length is 0)
+            {
+                MessageBox.Show($"Название не может быть пустым",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             SocialStatus_Label_Name.Visibility = Visibility.Visible;
             SocialStatus_TextBox_Name.Visibility = Visibility.Collapsed;
 
@@ -541,7 +572,7 @@ namespace DataBase_Medical.Windows
             SocialStatus_Button_Cancel.IsEnabled = false;
 
             string sql;
-            if (SocialStatus_Selected_Id == "")
+            if (!isReducting)
             {
                 SocialStatus_Selected_Id = (await ConnectionCarrier.Carrier.GetCurrentSequenceId("SocialStatus")).ToString();
                 sql = $"Insert Into \"SocialStatus\" (\"SocialStatus_Name\") Values ('{SocialStatus_TextBox_Name.Text}')";
@@ -561,9 +592,13 @@ namespace DataBase_Medical.Windows
 
                 SocialStatus_Label_Name.Content = SocialStatus_TextBox_Name.Text;
             }
-            catch
+            catch (Exception ex)
             {
-
+                if (ex.Message.Contains("повторяющееся"))
+                {
+                    MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             finally
             {
@@ -691,6 +726,7 @@ namespace DataBase_Medical.Windows
 
         private void Procedure_MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
+            isReducting = false;
             Procedure_Label_Name.Visibility = Visibility.Collapsed;
             Procedure_TextBox_Name.Visibility = Visibility.Visible;
 
@@ -724,6 +760,8 @@ namespace DataBase_Medical.Windows
             if (Procedure_Selected_Id == String.Empty)
                 return;
 
+            isReducting = true;
+
             Procedure_Label_Name.Visibility = Visibility.Collapsed;
             Procedure_TextBox_Name.Visibility = Visibility.Visible;
 
@@ -746,6 +784,13 @@ namespace DataBase_Medical.Windows
 
         private async void Procedure_Button_Ok_Click(object sender, RoutedEventArgs e)
         {
+            if (Procedure_TextBox_Name.Text.Length is 0)
+            {
+                MessageBox.Show($"Название не может быть пустым",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             Procedure_Label_Name.Visibility = Visibility.Visible;
             Procedure_TextBox_Name.Visibility = Visibility.Collapsed;
 
@@ -754,7 +799,7 @@ namespace DataBase_Medical.Windows
             Procedure_Button_Cancel.IsEnabled = false;
 
             string sql;
-            if (Procedure_Selected_Id == "")
+            if (!isReducting)
             {
                 Procedure_Selected_Id = (await ConnectionCarrier.Carrier.GetCurrentSequenceId("Procedure")).ToString();
                 sql = $"Insert Into \"Procedure\" (\"Procedure_Name\") Values ('{Procedure_TextBox_Name.Text}')";
@@ -774,9 +819,13 @@ namespace DataBase_Medical.Windows
 
                 Procedure_Label_Name.Content = Procedure_TextBox_Name.Text;
             }
-            catch
+            catch (Exception ex)
             {
-
+                if (ex.Message.Contains("повторяющееся"))
+                {
+                    MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             finally
             {
@@ -904,6 +953,7 @@ namespace DataBase_Medical.Windows
 
         private void Disease_MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
+            isReducting = false;
             Disease_Label_Name.Visibility = Visibility.Collapsed;
             Disease_TextBox_Name.Visibility = Visibility.Visible;
 
@@ -937,6 +987,8 @@ namespace DataBase_Medical.Windows
             if (Disease_Selected_Id == String.Empty)
                 return;
 
+            isReducting = true;
+
             Disease_Label_Name.Visibility = Visibility.Collapsed;
             Disease_TextBox_Name.Visibility = Visibility.Visible;
 
@@ -959,6 +1011,13 @@ namespace DataBase_Medical.Windows
 
         private async void Disease_Button_Ok_Click(object sender, RoutedEventArgs e)
         {
+            if (Disease_TextBox_Name.Text.Length is 0)
+            {
+                MessageBox.Show($"Название не может быть пустым",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             Disease_Label_Name.Visibility = Visibility.Visible;
             Disease_TextBox_Name.Visibility = Visibility.Collapsed;
 
@@ -967,7 +1026,7 @@ namespace DataBase_Medical.Windows
             Disease_Button_Cancel.IsEnabled = false;
 
             string sql;
-            if (Disease_Selected_Id == "")
+            if (!isReducting)
             {
                 Disease_Selected_Id = (await ConnectionCarrier.Carrier.GetCurrentSequenceId("Disease")).ToString();
                 sql = $"Insert Into \"Disease\" (\"Disease_Name\") Values ('{Disease_TextBox_Name.Text}')";
@@ -987,9 +1046,13 @@ namespace DataBase_Medical.Windows
 
                 Disease_Label_Name.Content = Disease_TextBox_Name.Text;
             }
-            catch
+            catch (Exception ex)
             {
-
+                if (ex.Message.Contains("повторяющееся"))
+                {
+                    MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
             finally
             {
@@ -1129,6 +1192,8 @@ namespace DataBase_Medical.Windows
 
         private void Department_MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
+            isReducting = false;
+
             Department_Label_Name.Visibility = Visibility.Collapsed;
             Department_TextBox_Name.Visibility = Visibility.Visible;
 
@@ -1227,6 +1292,8 @@ namespace DataBase_Medical.Windows
             if (Department_Selected_Id == String.Empty)
                 return;
 
+            isReducting = true;
+
             Department_Label_Name.Visibility = Visibility.Collapsed;
             Department_TextBox_Name.Visibility = Visibility.Visible;
 
@@ -1263,6 +1330,13 @@ namespace DataBase_Medical.Windows
 
         private async void Department_Button_Ok_Click(object sender, RoutedEventArgs e)
         {
+            if (Department_TextBox_Name.Text.Length is 0)
+            {
+                MessageBox.Show($"Название не может быть пустым",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             try
             {
                 Int32.Parse(Department_TextBox_Beds.Text);
@@ -1289,7 +1363,7 @@ namespace DataBase_Medical.Windows
             Department_Button_Cancel.IsEnabled = false;
 
             string sql;
-            if (Department_Selected_Id == "")
+            if (!isReducting)
             {
                 Department_Selected_Id = (await ConnectionCarrier.Carrier.GetCurrentSequenceId("Department")).ToString();
                 sql = $"Insert Into \"Department\" (\"Department_Name\", \"Department_Phone\", \"Department_Beds\") " +
@@ -1328,6 +1402,11 @@ namespace DataBase_Medical.Windows
                 {
                     MessageBox.Show($"Невозможно установить количество коек меньше,{Environment.NewLine}" +
                         $"чем используется в данный момент",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else if (ex.Message.Contains("повторяющееся"))
+                {
+                    MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Уже есть отдиление с таким же названием",
                         "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
@@ -1376,12 +1455,12 @@ namespace DataBase_Medical.Windows
         Dictionary<String, string> Categories = new();
         Dictionary<String, string> Departments = new();
         Dictionary<String, string> JobTitles = new()
-            {
-                    { "Главный врач", "chief" },
-                    { "Заведующий отделением", "department_chief" },
-                    { "Врач", "doctor" },
-                    { "Администратор", "admin" }
-            };
+        {
+            { "chief", "Главный врач" },
+            { "department_chief", "Заведующий отделением" },
+            { "doctor" , "Врач" },
+            { "admin" , "Администратор" }
+        };
 
 
         private async void Staff_Load_Data(String id)
@@ -1417,7 +1496,7 @@ namespace DataBase_Medical.Windows
                 Staff_Label_Date.Content = data["Дата принятия на работу"].Split(' ')[0];
                 Staff_Label_Salary.Content = data["Оклад"];
                 Staff_Label_Login.Content = data["Логн"];
-                Staff_Label_JobTitle.Content = JobTitles.Where(x => x.Value == data["Должность"]).FirstOrDefault().Key;
+                Staff_Label_JobTitle.Content = JobTitles.Where(x => x.Key == data["Должность"]).FirstOrDefault().Value;
             }
             catch
             {
@@ -1527,100 +1606,9 @@ namespace DataBase_Medical.Windows
                Visibility.Collapsed : Visibility.Visible;
         }
 
-        private void Staff_MenuItem_Add_Click(object sender, RoutedEventArgs e)
+        private async void Staff_MenuItem_Add_Click(object sender, RoutedEventArgs e)
         {
-            //Department_Label_Name.Visibility = Visibility.Collapsed;
-            //Department_TextBox_Name.Visibility = Visibility.Visible;
-
-            //Department_Label_Phone.Visibility = Visibility.Collapsed;
-            //Department_TextBox_Phone.Visibility = Visibility.Visible;
-
-            //Department_Label_Beds.Visibility = Visibility.Collapsed;
-            //Department_TextBox_Beds.Visibility = Visibility.Visible;
-
-            Staff_Button_Reduct.IsEnabled = false;
-            Staff_Button_Ok.IsEnabled = true;
-            Staff_Button_Cancel.IsEnabled = true;
-
-            //Department_TextBox_Name.Text = "";
-            //Department_TextBox_Phone.Text = "";
-            //Department_TextBox_Beds.Text = "";
-        }
-
-        private async void Staff_MenuItem_Delete_Click(object sender, RoutedEventArgs e)
-        {
-            bool isDeleting = true;
-            if (Staff_Selected_Id == String.Empty)
-            {
-                return;
-            }
-
-            MessageBoxResult result = MessageBox.Show(
-                "Вы точно уверены, что хотите удалить этого сотрудника?",
-                "Внимание", MessageBoxButton.YesNo, MessageBoxImage.Warning);
-
-            if (result is not MessageBoxResult.Yes)
-            {
-                return;
-            }
-
-            String sql = $"CALL delete_staff{Staff_Selected_Id}";
-
-            var conn = ConnectionCarrier.Carrier.Connection;
-            try
-            {
-                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
-            }
-            catch (Exception ex)
-            {
-                isDeleting = false;
-                if (ex.Message.Contains("doctor for"))
-                {
-                    MessageBox.Show($"Невозможно выполнить удаление{Environment.NewLine}У данного доктора есть пациенты",
-                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                }
-            }
-            finally
-            {
-                await conn.CloseAsync();
-            }
-
-            if (isDeleting)
-            {
-                RaiseFirstSelection(Department_DataGrid);
-            }
-        }
-
-        private void Staff_DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
-        {
-            if (Staff_DataGrid.SelectedIndex is -1)
-                return;
-            //Department_Label_Name.Visibility = Visibility.Visible;
-            //Department_TextBox_Name.Visibility = Visibility.Collapsed;
-
-            //Department_Label_Phone.Visibility = Visibility.Visible;
-            //Department_TextBox_Phone.Visibility = Visibility.Collapsed;
-
-            //Department_Label_Beds.Visibility = Visibility.Visible;
-            //Department_TextBox_Beds.Visibility = Visibility.Collapsed;
-
-            Staff_Button_Reduct.IsEnabled = true;
-            Staff_Button_Ok.IsEnabled = false;
-            Staff_Button_Cancel.IsEnabled = false;
-
-            var vs = Staff_DataGrid.SelectedIndex;
-            var row = Staff_DataGrid.Items[vs] as DataRowView;
-            Staff_Selected_Id = row?["id"].ToString();
-
-            Staff_Load_Data(Staff_Selected_Id);
-        }
-
-        private async void Staff_Button_Reduct_Click(object sender, RoutedEventArgs e)
-        {
-            if (Staff_Selected_Id == String.Empty)
-                return;
+            isReducting = false;
 
             Staff_Label_Surname.Visibility = Visibility.Collapsed;
             Staff_TextBox_Surname.Visibility = Visibility.Visible;
@@ -1640,8 +1628,186 @@ namespace DataBase_Medical.Windows
             Staff_Label_Category.Visibility = Visibility.Collapsed;
             Staff_ComboBox_Category.Visibility = Visibility.Visible;
 
-            Staff_Label_Date.Visibility = Visibility.Collapsed;
-            Staff_DatePicker_Date.Visibility = Visibility.Visible;
+            Staff_Label_Salary.Visibility = Visibility.Collapsed;
+            Staff_TextBox_Salary.Visibility = Visibility.Visible;
+
+            Staff_Label_JobTitle.Visibility = Visibility.Collapsed;
+            Staff_ComboBox_JobTitle.Visibility = Visibility.Visible;
+
+            Staff_Label_Password.Visibility = Visibility.Visible;
+            Staff_TextBox_Password.Visibility = Visibility.Visible;
+
+            Staff_Button_Reduct.IsEnabled = false;
+            Staff_Button_Ok.IsEnabled = true;
+            Staff_Button_Cancel.IsEnabled = true;
+
+            Staff_DatePicker_Date.Text = DateTime.Now.ToString();
+            Staff_Label_Date.Content = Staff_DatePicker_Date.Text;
+
+            Staff_TextBox_Surname.Text = "";
+            Staff_TextBox_Name.Text = "";
+            Staff_TextBox_Patronymic.Text = "";
+            Staff_TextBox_Login.Text = "";
+            Staff_TextBox_Salary.Text = "";
+            Staff_TextBox_Password.Text = "";
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = "Select * From \"Category\"";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                Categories.Clear();
+                Categories = this.NpgsqlDataReader_To_DictionaryList(reader, "Category_Id", "Category_Name");
+                Categories.Add("NULL", "");
+                reader.Close();
+
+                sql = "Select * From \"Department\"";
+                reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+                Departments.Clear();
+                Departments = this.NpgsqlDataReader_To_DictionaryList(reader, "Department_Id", "Department_Name");
+                Departments.Add("NULL", "");
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+            Staff_ComboBox_Department.ItemsSource = Departments.Values.OrderBy(x => x).ToArray();
+            Staff_ComboBox_Department.SelectedIndex = Staff_ComboBox_Department.Items.IndexOf("");
+
+            Staff_ComboBox_Category.ItemsSource = Categories.Values.OrderBy(x => x).ToArray();
+            Staff_ComboBox_Category.SelectedIndex = Staff_ComboBox_Category.Items.IndexOf("");
+
+            Staff_ComboBox_JobTitle.ItemsSource = JobTitles.Values.OrderBy(x => x).ToArray();
+            Staff_ComboBox_JobTitle.SelectedIndex = Staff_ComboBox_JobTitle.Items.IndexOf("");
+        }
+
+        private async void Staff_MenuItem_Delete_Click(object sender, RoutedEventArgs e)
+        {
+            bool isDeleting = true;
+            if (Staff_Selected_Id == String.Empty)
+            {
+                return;
+            }
+
+            MessageBoxResult result = MessageBox.Show(
+                "Вы точно уверены, что хотите удалить этого сотрудника?",
+                "Внимание", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (result is not MessageBoxResult.Yes)
+            {
+                return;
+            }
+
+            String sql = $"CALL delete_staff({Staff_Selected_Id})";
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
+            }
+            catch (Exception ex)
+            {
+                isDeleting = false;
+                if (ex.Message.Contains("doctor for"))
+                {
+                    MessageBox.Show($"Невозможно выполнить удаление{Environment.NewLine}У данного доктора есть пациенты",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                }
+                else if (ex.Message.Contains("себя"))
+                {
+                    MessageBox.Show($"Невозможно выполнить удаление{Environment.NewLine}Пользователь не может удалить сам себя",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+
+            if (isDeleting)
+            {
+                RaiseFirstSelection(Department_DataGrid);
+            }
+        }
+
+        private void Staff_DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            if (Staff_DataGrid.SelectedIndex is -1)
+                return;
+
+            Staff_Label_Surname.Visibility = Visibility.Visible;
+            Staff_TextBox_Surname.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Name.Visibility = Visibility.Visible;
+            Staff_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Patronymic.Visibility = Visibility.Visible;
+            Staff_TextBox_Patronymic.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Department.Visibility = Visibility.Visible;
+            Staff_ComboBox_Department.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Login.Visibility = Visibility.Visible;
+            Staff_TextBox_Login.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Category.Visibility = Visibility.Visible;
+            Staff_ComboBox_Category.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Date.Visibility = Visibility.Visible;
+            Staff_DatePicker_Date.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Salary.Visibility = Visibility.Visible;
+            Staff_TextBox_Salary.Visibility = Visibility.Collapsed;
+
+            Staff_Label_JobTitle.Visibility = Visibility.Visible;
+            Staff_ComboBox_JobTitle.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Password.Visibility = Visibility.Collapsed;
+            Staff_TextBox_Password.Visibility = Visibility.Collapsed;
+
+            Staff_Button_Reduct.IsEnabled = true;
+            Staff_Button_Ok.IsEnabled = false;
+            Staff_Button_Cancel.IsEnabled = false;
+
+            var vs = Staff_DataGrid.SelectedIndex;
+            var row = Staff_DataGrid.Items[vs] as DataRowView;
+            Staff_Selected_Id = row?["id"].ToString();
+
+            Staff_Load_Data(Staff_Selected_Id);
+        }
+
+        private async void Staff_Button_Reduct_Click(object sender, RoutedEventArgs e)
+        {
+            if (Staff_Selected_Id == String.Empty)
+                return;
+
+            isReducting = true;
+
+            Staff_Label_Surname.Visibility = Visibility.Collapsed;
+            Staff_TextBox_Surname.Visibility = Visibility.Visible;
+
+            Staff_Label_Name.Visibility = Visibility.Collapsed;
+            Staff_TextBox_Name.Visibility = Visibility.Visible;
+
+            Staff_Label_Patronymic.Visibility = Visibility.Collapsed;
+            Staff_TextBox_Patronymic.Visibility = Visibility.Visible;
+
+            Staff_Label_Department.Visibility = Visibility.Collapsed;
+            Staff_ComboBox_Department.Visibility = Visibility.Visible;
+
+            Staff_Label_Login.Visibility = Visibility.Collapsed;
+            Staff_TextBox_Login.Visibility = Visibility.Visible;
+
+            Staff_Label_Category.Visibility = Visibility.Collapsed;
+            Staff_ComboBox_Category.Visibility = Visibility.Visible;
 
             Staff_Label_Salary.Visibility = Visibility.Collapsed;
             Staff_TextBox_Salary.Visibility = Visibility.Visible;
@@ -1656,59 +1822,80 @@ namespace DataBase_Medical.Windows
             Staff_Button_Ok.IsEnabled = true;
             Staff_Button_Cancel.IsEnabled = true;
 
-            //Staff_TextBox_Surname.Text = Staff_Label_Surname.Content.ToString();
-            //Staff_TextBox_Name.Text = Staff_Label_Name.Content.ToString();
-            //Staff_TextBox_Patronymic.Text = Staff_Label_Patronymic.Content.ToString();
-            //Staff_TextBox_Login.Text = Staff_Label_Login.Content.ToString();
-            //Staff_DatePicker_Date.Text = Staff_Label_Date.Content.ToString();
-            //Staff_TextBox_Salary.Text = Staff_Label_Salary.Content.ToString();
-            //Staff_TextBox_Password.Text = "";
+            Staff_TextBox_Surname.Text = Staff_Label_Surname.Content.ToString();
+            Staff_TextBox_Name.Text = Staff_Label_Name.Content.ToString();
+            Staff_TextBox_Patronymic.Text = Staff_Label_Patronymic.Content.ToString();
+            Staff_TextBox_Login.Text = Staff_Label_Login.Content.ToString();
+            Staff_TextBox_Salary.Text = Staff_Label_Salary.Content.ToString();
+            Staff_TextBox_Password.Text = "";
 
-            //var conn = ConnectionCarrier.Carrier.Connection;
-            //try
-            //{
-            //    await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-            //    String sql = "Select * From \"Category\"";
-            //    var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+            var conn = ConnectionCarrier.Carrier.Connection;
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = "Select * From \"Category\"";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
-            //    Categories = this.NpgsqlDataReader_To_Dictionary(reader, new Dictionary<string, string>()
-            //    {
-            //        { "id", "Category_Id" },
-            //        { "Название категории", "Category_Name" }
-            //    });
-            //    Categories.Add("", "NULL");
-            //    Departments = this.NpgsqlDataReader_To_Dictionary(reader, new Dictionary<string, string>()
-            //    {
-            //        { "id", "Department_Id" },
-            //        { "Название отделения", "Department_Name" }
-            //    });
-            //    Departments.Add("", "NULL");
-            //}
-            //catch
-            //{
+                Categories.Clear();
+                Categories = this.NpgsqlDataReader_To_DictionaryList(reader, "Category_Id", "Category_Name");
+                Categories.Add("NULL", "");
+                reader.Close();
 
-            //}
-            //finally
-            //{
-            //    await conn.CloseAsync();
-            //}
-            //Staff_ComboBox_Department.ItemsSource = Departments.Values.OrderBy(x => x);
-            //Staff_ComboBox_Department.SelectedIndex = Staff_ComboBox_Department.Items.IndexOf(Staff_Label_Department.Content);
+                sql = "Select * From \"Department\"";
+                reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+                Departments.Clear();
+                Departments = this.NpgsqlDataReader_To_DictionaryList(reader, "Department_Id", "Department_Name");
+                Departments.Add("NULL", "");
+            }
+            catch
+            {
 
-            //Staff_ComboBox_Category.ItemsSource = Categories.Values.OrderBy(x => x);
-            //Staff_ComboBox_Category.SelectedIndex = Staff_ComboBox_Category.Items.IndexOf(Staff_Label_Category.Content);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+            Staff_ComboBox_Department.ItemsSource = Departments.Values.OrderBy(x => x).ToArray();
+            Staff_ComboBox_Department.SelectedIndex = Staff_ComboBox_Department.Items.IndexOf(Staff_Label_Department.Content);
+
+            Staff_ComboBox_Category.ItemsSource = Categories.Values.OrderBy(x => x).ToArray();
+            Staff_ComboBox_Category.SelectedIndex = Staff_ComboBox_Category.Items.IndexOf(Staff_Label_Category.Content);
+
+            Staff_ComboBox_JobTitle.ItemsSource = JobTitles.Values.OrderBy(x => x).ToArray();
+            Staff_ComboBox_JobTitle.SelectedIndex = Staff_ComboBox_JobTitle.Items.IndexOf(Staff_Label_JobTitle.Content);
         }
 
         private void Staff_Button_Cancel_Click(object sender, RoutedEventArgs e)
         {
-            //Department_Label_Name.Visibility = Visibility.Visible;
-            //Department_TextBox_Name.Visibility = Visibility.Collapsed;
+            Staff_Label_Surname.Visibility = Visibility.Visible;
+            Staff_TextBox_Surname.Visibility = Visibility.Collapsed;
 
-            //Department_Label_Phone.Visibility = Visibility.Visible;
-            //Department_TextBox_Phone.Visibility = Visibility.Collapsed;
+            Staff_Label_Name.Visibility = Visibility.Visible;
+            Staff_TextBox_Name.Visibility = Visibility.Collapsed;
 
-            //Department_Label_Beds.Visibility = Visibility.Visible;
-            //Department_TextBox_Beds.Visibility = Visibility.Collapsed;
+            Staff_Label_Patronymic.Visibility = Visibility.Visible;
+            Staff_TextBox_Patronymic.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Department.Visibility = Visibility.Visible;
+            Staff_ComboBox_Department.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Login.Visibility = Visibility.Visible;
+            Staff_TextBox_Login.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Category.Visibility = Visibility.Visible;
+            Staff_ComboBox_Category.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Date.Visibility = Visibility.Visible;
+            Staff_DatePicker_Date.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Salary.Visibility = Visibility.Visible;
+            Staff_TextBox_Salary.Visibility = Visibility.Collapsed;
+
+            Staff_Label_JobTitle.Visibility = Visibility.Visible;
+            Staff_ComboBox_JobTitle.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Password.Visibility = Visibility.Collapsed;
+            Staff_TextBox_Password.Visibility = Visibility.Collapsed;
 
             Staff_Button_Reduct.IsEnabled = true;
             Staff_Button_Ok.IsEnabled = false;
@@ -1717,79 +1904,109 @@ namespace DataBase_Medical.Windows
 
         private async void Staff_Button_Ok_Click(object sender, RoutedEventArgs e)
         {
-            //try
-            //{
-            //    Int32.Parse(Department_TextBox_Beds.Text);
-            //}
-            //catch
-            //{
-            //    MessageBox.Show($"Невозможно считать число кроватей. Повторите ввод",
-            //            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-            //    return;
-            //}
+            if (!isReducting & Staff_TextBox_Password.Text.Length is 0)
+            {
+                // Про обязательный пароль при создании
+            }
+            if (isReducting & Staff_TextBox_Password.Text.Length is not 0)
+            {
+                // Предупреждение о смене пароля
+            }
+            
 
+            Staff_Label_Surname.Content = "";
+            Staff_Label_Surname.Visibility = Visibility.Visible;
+            Staff_TextBox_Surname.Visibility = Visibility.Collapsed;
 
-            //Department_Label_Name.Visibility = Visibility.Visible;
-            //Department_TextBox_Name.Visibility = Visibility.Collapsed;
+            Staff_Label_Name.Content = "";
+            Staff_Label_Name.Visibility = Visibility.Visible;
+            Staff_TextBox_Name.Visibility = Visibility.Collapsed;
 
-            //Department_Label_Phone.Visibility = Visibility.Visible;
-            //Department_TextBox_Phone.Visibility = Visibility.Collapsed;
+            Staff_Label_Patronymic.Content = "";
+            Staff_Label_Patronymic.Visibility = Visibility.Visible;
+            Staff_TextBox_Patronymic.Visibility = Visibility.Collapsed;
 
-            //Department_Label_Beds.Visibility = Visibility.Visible;
-            //Department_TextBox_Beds.Visibility = Visibility.Collapsed;
+            Staff_Label_Department.Content = "";
+            Staff_Label_Department.Visibility = Visibility.Visible;
+            Staff_ComboBox_Department.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Login.Content = "";
+            Staff_Label_Login.Visibility = Visibility.Visible;
+            Staff_TextBox_Login.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Category.Content = "";
+            Staff_Label_Category.Visibility = Visibility.Visible;
+            Staff_ComboBox_Category.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Date.Content = "";
+            Staff_Label_Date.Visibility = Visibility.Visible;
+            Staff_DatePicker_Date.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Salary.Content = "";
+            Staff_Label_Salary.Visibility = Visibility.Visible;
+            Staff_TextBox_Salary.Visibility = Visibility.Collapsed;
+
+            Staff_Label_JobTitle.Content = "";
+            Staff_Label_JobTitle.Visibility = Visibility.Visible;
+            Staff_ComboBox_JobTitle.Visibility = Visibility.Collapsed;
+
+            Staff_Label_Password.Visibility = Visibility.Collapsed;
+            Staff_TextBox_Password.Visibility = Visibility.Collapsed;
 
             Staff_Button_Reduct.IsEnabled = true;
             Staff_Button_Ok.IsEnabled = false;
             Staff_Button_Cancel.IsEnabled = false;
 
-            string sql;
-            if (Staff_Selected_Id == "")
+            string sql = "";
+
+            if (!isReducting)
             {
                 Staff_Selected_Id = (await ConnectionCarrier.Carrier.GetCurrentSequenceId("Staff")).ToString();
-                //sql = $"Insert Into \"Department\" (\"Department_Name\", \"Department_Phone\", \"Department_Beds\") " +
-                //    $"Values ('{Department_TextBox_Name.Text}', '{Department_TextBox_Phone.Text}', " +
-                //    $"'{Department_TextBox_Beds.Text}')";
+
+                var dep_id = Departments.Where(x => x.Value == Staff_ComboBox_Department.Text).First().Key;
+                var cat_id = Categories.Where(x => x.Value == Staff_ComboBox_Category.Text).First().Key;
+                var date = DateTime.Now;
+                sql = $"Insert Into \"Staff\" (\"Staff_Name\", \"Staff_Surname\", \"Staff_Patronymic\", " +
+                    $"\"Staff_Department_Id\", \"Staff_Category_Id\", \"Staff_EmploymentDate\", " +
+                    $"\"Staff_Salary\", \"Staff_Login\") Values " +
+                    $"('{Staff_TextBox_Name.Text}', '{Staff_TextBox_Surname.Text}', '{Staff_TextBox_Patronymic.Text}', " +
+                    $"'{dep_id}', '{cat_id}', '{date:dd-MM-yyyy}', " +
+                    $"'{Staff_TextBox_Salary.Text}', '{Staff_TextBox_Login.Text}');\n" +
+                    $"Select change_password('{Staff_TextBox_Login.Text}', '{Staff_TextBox_Password.Text}');\n" +
+                    $"Call add_user_to_{JobTitles.Where(x => x.Value == Staff_ComboBox_JobTitle.Text).First().Key}s_group('{Staff_TextBox_Login.Text}')";
             }
             else
             {
-                //sql = $"Update \"Department\" Set \"Department_Name\" = '{Department_TextBox_Name.Text}', " +
-                //    $"\"Department_Phone\" = '{Department_TextBox_Phone.Text}', " +
-                //    $"\"Department_Beds\" = {Department_TextBox_Beds.Text} " +
-                //    $"Where \"Department_Id\" = {Department_Selected_Id}";
+                var dep_id = Departments.Where(x => x.Value == Staff_ComboBox_Department.Text).First().Key;
+                var cat_id = Categories.Where(x => x.Value == Staff_ComboBox_Category.Text).First().Key;
+                sql = $"Update \"Staff\" Set " +
+                                    $"\"Staff_Name\" = '{Staff_TextBox_Name.Text}', " +
+                                    $"\"Staff_Surname\" = '{Staff_TextBox_Surname.Text}', " +
+                                    $"\"Staff_Patronymic\" = '{Staff_TextBox_Patronymic.Text}', " +
+                                    $"\"Staff_Department_Id\" = '{dep_id}', " +
+                                    $"\"Staff_Category_Id\" = '{cat_id}', " +
+                                    $"\"Staff_Salary\" = '{Staff_TextBox_Salary.Text}', " +
+                                    $"\"Staff_Login\" = '{Staff_TextBox_Login.Text}';\n" +
+                                    (Staff_TextBox_Password.Text.Length is 0 ? "" : $"Select change_password('{Staff_TextBox_Login.Text}', '{Staff_TextBox_Password.Text}');\n") +
+                                    $"Call add_user_to_{JobTitles.Where(x => x.Value == Staff_ComboBox_JobTitle.Text).First().Key}s_group('{Staff_TextBox_Login.Text}')";
             }
-
 
             var conn = ConnectionCarrier.Carrier.Connection;
 
             try
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                //await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
-
-                //Department_Label_Name.Content = Department_TextBox_Name.Text;
-                //Department_Label_Phone.Content = Department_TextBox_Phone.Text;
-                //Department_Label_Beds.Content = Department_TextBox_Beds.Text;
+                await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
             }
             catch (Exception ex)
             {
-                //if (ex.Message.Contains("negative"))
-                //{
-                //    MessageBox.Show($"Невозможно установить отрицательное количество коек",
-                //        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-
-                //}
-                //else if (ex.Message.Contains("less"))
-                //{
-                //    MessageBox.Show($"Невозможно установить количество коек меньше,{Environment.NewLine}" +
-                //        $"чем используется в данный момент",
-                //        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                //}
+                throw;
             }
             finally
             {
                 await conn.CloseAsync();
             }
-
+            
             Staff_MenuItem_Refresh_Click(sender, e);
         }
 
