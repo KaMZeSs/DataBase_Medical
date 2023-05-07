@@ -49,6 +49,9 @@ namespace DataBase_Medical.Windows
                 case "Больные":
                 {
                     this.Grid_Patient.Visibility = Visibility.Visible;
+                    Patient_MenuItem_Refresh_Click(sender, e);
+                    await ConnectionCarrier.Carrier.WaitForConnectionAsync();
+                    RaiseFirstSelection(Patient_DataGrid);
                     break;
                 }
                 case "Персонал":
@@ -233,7 +236,7 @@ namespace DataBase_Medical.Windows
             try
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                String sql = "Select * From \"Category\"";
+                String sql = "Select * From \"Category\" Order By \"Category_Id\"";
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
@@ -336,13 +339,6 @@ namespace DataBase_Medical.Windows
                 return;
             }
 
-            Category_Label_Name.Visibility = Visibility.Visible;
-            Category_TextBox_Name.Visibility = Visibility.Collapsed;
-
-            Category_Button_Reduct.IsEnabled = true;
-            Category_Button_Ok.IsEnabled = false;
-            Category_Button_Cancel.IsEnabled = false;
-
             string sql;
             if (!isReducting)
             {
@@ -354,27 +350,35 @@ namespace DataBase_Medical.Windows
                 sql = $"Update \"Category\" Set \"Category_Name\" = '{Category_TextBox_Name.Text}' Where \"Category_Id\" = {Category_Selected_Id}";
             }
 
-
-            var conn = ConnectionCarrier.Carrier.Connection;
-
-            try
+            if (!isReducting | (isReducting & Category_Label_Name.Content.ToString() != Category_TextBox_Name.Text))
             {
-                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
+                var conn = ConnectionCarrier.Carrier.Connection;
 
-                Category_Label_Name.Content = Category_TextBox_Name.Text;
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message.Contains("повторяющееся"))
+                try
                 {
-                    MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
-                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                    await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
+
+                    Category_Label_Name.Content = Category_TextBox_Name.Text;
                 }
-            }
-            finally
-            {
-                await conn.CloseAsync();
+                catch (Exception ex)
+                {
+                    if (ex.Message.Contains("повторяющееся"))
+                    {
+                        MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
+                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Непредвиденная ошибка{Environment.NewLine}{ex.Message}",
+                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    return;
+                }
+                finally
+                {
+                    await conn.CloseAsync();
+                }
             }
 
             Category_MenuItem_Refresh_Click(sender, e);
@@ -387,7 +391,7 @@ namespace DataBase_Medical.Windows
             try
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                String sql = $"Select * From \"Category\" Where lower(\"Category_Name\") Like '%{Category_TextBox_SearchData.Text.ToLower()}%'";
+                String sql = $"Select * From \"Category\" Where lower(\"Category_Name\") Like '%{Category_TextBox_SearchData.Text.ToLower()}%' Order By \"Category_Id\"";
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
@@ -408,7 +412,6 @@ namespace DataBase_Medical.Windows
                 await conn.CloseAsync();
             }
         }
-
 
         #endregion
 
@@ -460,7 +463,7 @@ namespace DataBase_Medical.Windows
             try
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                String sql = "Select * From \"SocialStatus\"";
+                String sql = "Select * From \"SocialStatus\" Order By \"SocialStatus_Id\"";
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
@@ -564,13 +567,6 @@ namespace DataBase_Medical.Windows
                 return;
             }
 
-            SocialStatus_Label_Name.Visibility = Visibility.Visible;
-            SocialStatus_TextBox_Name.Visibility = Visibility.Collapsed;
-
-            SocialStatus_Button_Reduct.IsEnabled = true;
-            SocialStatus_Button_Ok.IsEnabled = false;
-            SocialStatus_Button_Cancel.IsEnabled = false;
-
             string sql;
             if (!isReducting)
             {
@@ -582,27 +578,35 @@ namespace DataBase_Medical.Windows
                 sql = $"Update \"SocialStatus\" Set \"SocialStatus_Name\" = '{SocialStatus_TextBox_Name.Text}' Where \"SocialStatus_Id\" = {SocialStatus_Selected_Id}";
             }
 
-
-            var conn = ConnectionCarrier.Carrier.Connection;
-
-            try
+            if (!isReducting | (isReducting & SocialStatus_Label_Name.Content.ToString() != SocialStatus_TextBox_Name.Text))
             {
-                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
+                var conn = ConnectionCarrier.Carrier.Connection;
 
-                SocialStatus_Label_Name.Content = SocialStatus_TextBox_Name.Text;
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message.Contains("повторяющееся"))
+                try
                 {
-                    MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
-                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                    await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
+
+                    SocialStatus_Label_Name.Content = SocialStatus_TextBox_Name.Text;
                 }
-            }
-            finally
-            {
-                await conn.CloseAsync();
+                catch (Exception ex)
+                {
+                    if (ex.Message.Contains("повторяющееся"))
+                    {
+                        MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
+                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Непредвиденная ошибка{Environment.NewLine}{ex.Message}",
+                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    return;
+                }
+                finally
+                {
+                    await conn.CloseAsync();
+                }
             }
 
             SocialStatus_MenuItem_Refresh_Click(sender, e);
@@ -615,7 +619,7 @@ namespace DataBase_Medical.Windows
             try
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                String sql = $"Select * From \"SocialStatus\" Where lower(\"SocialStatus_Name\") Like '%{SocialStatus_TextBox_SearchData.Text.ToLower()}%'";
+                String sql = $"Select * From \"SocialStatus\" Where lower(\"SocialStatus_Name\") Like '%{SocialStatus_TextBox_SearchData.Text.ToLower()}%' Order By \"SocialStatus_Id\"";
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
@@ -687,7 +691,7 @@ namespace DataBase_Medical.Windows
             try
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                String sql = "Select * From \"Procedure\"";
+                String sql = "Select * From \"Procedure\" Order By \"Procedure_Id\"";
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
@@ -791,13 +795,6 @@ namespace DataBase_Medical.Windows
                 return;
             }
 
-            Procedure_Label_Name.Visibility = Visibility.Visible;
-            Procedure_TextBox_Name.Visibility = Visibility.Collapsed;
-
-            Procedure_Button_Reduct.IsEnabled = true;
-            Procedure_Button_Ok.IsEnabled = false;
-            Procedure_Button_Cancel.IsEnabled = false;
-
             string sql;
             if (!isReducting)
             {
@@ -809,27 +806,35 @@ namespace DataBase_Medical.Windows
                 sql = $"Update \"Procedure\" Set \"Procedure_Name\" = '{Procedure_TextBox_Name.Text}' Where \"Procedure_Id\" = {Procedure_Selected_Id}";
             }
 
-
-            var conn = ConnectionCarrier.Carrier.Connection;
-
-            try
+            if (!isReducting | (isReducting & Procedure_Label_Name.Content.ToString() != Procedure_TextBox_Name.Text))
             {
-                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
+                var conn = ConnectionCarrier.Carrier.Connection;
 
-                Procedure_Label_Name.Content = Procedure_TextBox_Name.Text;
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message.Contains("повторяющееся"))
+                try
                 {
-                    MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
-                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                    await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
+
+                    Procedure_Label_Name.Content = Procedure_TextBox_Name.Text;
                 }
-            }
-            finally
-            {
-                await conn.CloseAsync();
+                catch (Exception ex)
+                {
+                    if (ex.Message.Contains("повторяющееся"))
+                    {
+                        MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
+                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Непредвиденная ошибка{Environment.NewLine}{ex.Message}",
+                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    return;
+                }
+                finally
+                {
+                    await conn.CloseAsync();
+                }
             }
 
             Procedure_MenuItem_Refresh_Click(sender, e);
@@ -842,7 +847,7 @@ namespace DataBase_Medical.Windows
             try
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                String sql = $"Select * From \"Procedure\" Where lower(\"Procedure_Name\") Like '%{Procedure_TextBox_SearchData.Text.ToLower()}%'";
+                String sql = $"Select * From \"Procedure\" Where lower(\"Procedure_Name\") Like '%{Procedure_TextBox_SearchData.Text.ToLower()}%' Order By \"Procedure_Id\"";
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
@@ -914,7 +919,7 @@ namespace DataBase_Medical.Windows
             try
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                String sql = "Select * From \"Disease\"";
+                String sql = "Select * From \"Disease\" Order By \"Disease_Id\"";
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
@@ -1018,13 +1023,6 @@ namespace DataBase_Medical.Windows
                 return;
             }
 
-            Disease_Label_Name.Visibility = Visibility.Visible;
-            Disease_TextBox_Name.Visibility = Visibility.Collapsed;
-
-            Disease_Button_Reduct.IsEnabled = true;
-            Disease_Button_Ok.IsEnabled = false;
-            Disease_Button_Cancel.IsEnabled = false;
-
             string sql;
             if (!isReducting)
             {
@@ -1036,27 +1034,35 @@ namespace DataBase_Medical.Windows
                 sql = $"Update \"Disease\" Set \"Disease_Name\" = '{Disease_TextBox_Name.Text}' Where \"Disease_Id\" = {Disease_Selected_Id}";
             }
 
-
-            var conn = ConnectionCarrier.Carrier.Connection;
-
-            try
+            if (!isReducting | (isReducting & Procedure_Label_Name.Content.ToString() != Procedure_TextBox_Name.Text))
             {
-                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
+                var conn = ConnectionCarrier.Carrier.Connection;
 
-                Disease_Label_Name.Content = Disease_TextBox_Name.Text;
-            }
-            catch (Exception ex)
-            {
-                if (ex.Message.Contains("повторяющееся"))
+                try
                 {
-                    MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
-                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                    await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
+
+                    Disease_Label_Name.Content = Disease_TextBox_Name.Text;
                 }
-            }
-            finally
-            {
-                await conn.CloseAsync();
+                catch (Exception ex)
+                {
+                    if (ex.Message.Contains("повторяющееся"))
+                    {
+                        MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
+                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    else
+                    {
+                        MessageBox.Show($"Непредвиденная ошибка{Environment.NewLine}{ex.Message}",
+                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                    return;
+                }
+                finally
+                {
+                    await conn.CloseAsync();
+                }
             }
 
             Disease_MenuItem_Refresh_Click(sender, e);
@@ -1069,7 +1075,7 @@ namespace DataBase_Medical.Windows
             try
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                String sql = $"Select * From \"Disease\" Where lower(\"Disease_Name\") Like '%{Disease_TextBox_SearchData.Text.ToLower()}%'";
+                String sql = $"Select * From \"Disease\" Where lower(\"Disease_Name\") Like '%{Disease_TextBox_SearchData.Text.ToLower()}%' Order By \"Disease_Id\"";
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
@@ -1153,7 +1159,7 @@ namespace DataBase_Medical.Windows
             try
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                String sql = "Select * From \"Department\" Where \"Department_Exists\" = true";
+                String sql = "Select * From \"Department\" Where \"Department_Exists\" = true Order By \"Department_Id\"";
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
@@ -1347,20 +1353,6 @@ namespace DataBase_Medical.Windows
                         "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
-            
-
-            Department_Label_Name.Visibility = Visibility.Visible;
-            Department_TextBox_Name.Visibility = Visibility.Collapsed;
-
-            Department_Label_Phone.Visibility = Visibility.Visible;
-            Department_TextBox_Phone.Visibility = Visibility.Collapsed;
-
-            Department_Label_Beds.Visibility = Visibility.Visible;
-            Department_TextBox_Beds.Visibility = Visibility.Collapsed;
-
-            Department_Button_Reduct.IsEnabled = true;
-            Department_Button_Ok.IsEnabled = false;
-            Department_Button_Cancel.IsEnabled = false;
 
             string sql;
             if (!isReducting)
@@ -1372,7 +1364,8 @@ namespace DataBase_Medical.Windows
             }
             else
             {
-                sql = $"Update \"Department\" Set \"Department_Name\" = '{Department_TextBox_Name.Text}', " +
+                sql = $"Update \"Department\" Set " +
+                    (Department_TextBox_Name.Text == Department_Label_Name.Content.ToString() ? "" : $"\"Department_Name\" = '{Department_TextBox_Name.Text}', ") +
                     $"\"Department_Phone\" = '{Department_TextBox_Phone.Text}', " +
                     $"\"Department_Beds\" = {Department_TextBox_Beds.Text} " +
                     $"Where \"Department_Id\" = {Department_Selected_Id}";
@@ -1385,10 +1378,6 @@ namespace DataBase_Medical.Windows
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
                 await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
-
-                Department_Label_Name.Content = Department_TextBox_Name.Text;
-                Department_Label_Phone.Content = Department_TextBox_Phone.Text;
-                Department_Label_Beds.Content = Department_TextBox_Beds.Text;
             }
             catch (Exception ex) 
             {
@@ -1409,6 +1398,12 @@ namespace DataBase_Medical.Windows
                     MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Уже есть отдиление с таким же названием",
                         "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+                else
+                {
+                    MessageBox.Show($"Непредвиденная ошибка{Environment.NewLine}{ex.Message}",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                return;
             }
             finally
             {
@@ -1425,7 +1420,7 @@ namespace DataBase_Medical.Windows
             try
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                String sql = $"Select * From \"Department\" Where lower(\"Department_Name\") Like '%{Department_TextBox_SearchData.Text.ToLower()}%'";
+                String sql = $"Select * From \"Department\" Where lower(\"Department_Name\") Like '%{Department_TextBox_SearchData.Text.ToLower()}%' Order By \"Department_Id\"";
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
@@ -1558,7 +1553,7 @@ namespace DataBase_Medical.Windows
             try
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                String sql = "Select * FROM \"Staff_SurnameNP\"";
+                String sql = "Select * FROM \"Staff_SurnameNP\" Order By \"Staff_Id\"";
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
@@ -1904,58 +1899,80 @@ namespace DataBase_Medical.Windows
 
         private async void Staff_Button_Ok_Click(object sender, RoutedEventArgs e)
         {
+            // Проверки
+
+            if (Staff_TextBox_Surname.Text.Length is 0)
+            {
+                MessageBox.Show($"Фамилия пользователя не может быть пустой",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (Staff_TextBox_Name.Text.Length is 0)
+            {
+                MessageBox.Show($"Имя пользователя не может быть пустым",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (Staff_TextBox_Patronymic.Text.Length is 0)
+            {
+                MessageBox.Show($"Отчество пользователя не может быть пустым",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            try
+            {
+                Int32.Parse(Staff_TextBox_Salary.Text);
+            }
+            catch
+            {
+                MessageBox.Show($"Невозможно считать зарплату пользователя",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (Staff_TextBox_Login.Text.Length is 0)
+            {
+                MessageBox.Show($"Логин пользователя не может быть пустым",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             if (!isReducting & Staff_TextBox_Password.Text.Length is 0)
             {
-                // Про обязательный пароль при создании
+                MessageBox.Show($"Необходимо указать пароль при создании пользователя",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
             }
-            if (isReducting & Staff_TextBox_Password.Text.Length is not 0)
+
+            // Уточнения
+
+            if (!isReducting & (Staff_ComboBox_JobTitle.Text == Staff_Label_JobTitle.Content.ToString()))
             {
-                // Предупреждение о смене пароля
+                var vs = MessageBox.Show($"Вы точно уверены, что хотите изменить должность пользователя?",
+                        "Ошибка", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (vs is MessageBoxResult.No)
+                {
+                    return;
+                }
+            }
+
+            var login_changed = Staff_TextBox_Login.Text != Staff_Label_Login.Content.ToString();
+            var password_changed = Staff_TextBox_Password.Text.Length is not 0;
+            if (isReducting & (password_changed | login_changed))
+            {
+                var str = (login_changed ? "логин" : "") + (password_changed ? (login_changed ? " и пароль" : "пароль") : "");
+                var vs = MessageBox.Show($"Внимание, вы собираетесь изменить {str} пользователя{Environment.NewLine}Вы точно хотите продолжить?",
+                        "Ошибка", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (vs is MessageBoxResult.No)
+                {
+                    return;
+                }
             }
             
-
-            Staff_Label_Surname.Content = "";
-            Staff_Label_Surname.Visibility = Visibility.Visible;
-            Staff_TextBox_Surname.Visibility = Visibility.Collapsed;
-
-            Staff_Label_Name.Content = "";
-            Staff_Label_Name.Visibility = Visibility.Visible;
-            Staff_TextBox_Name.Visibility = Visibility.Collapsed;
-
-            Staff_Label_Patronymic.Content = "";
-            Staff_Label_Patronymic.Visibility = Visibility.Visible;
-            Staff_TextBox_Patronymic.Visibility = Visibility.Collapsed;
-
-            Staff_Label_Department.Content = "";
-            Staff_Label_Department.Visibility = Visibility.Visible;
-            Staff_ComboBox_Department.Visibility = Visibility.Collapsed;
-
-            Staff_Label_Login.Content = "";
-            Staff_Label_Login.Visibility = Visibility.Visible;
-            Staff_TextBox_Login.Visibility = Visibility.Collapsed;
-
-            Staff_Label_Category.Content = "";
-            Staff_Label_Category.Visibility = Visibility.Visible;
-            Staff_ComboBox_Category.Visibility = Visibility.Collapsed;
-
-            Staff_Label_Date.Content = "";
-            Staff_Label_Date.Visibility = Visibility.Visible;
-            Staff_DatePicker_Date.Visibility = Visibility.Collapsed;
-
-            Staff_Label_Salary.Content = "";
-            Staff_Label_Salary.Visibility = Visibility.Visible;
-            Staff_TextBox_Salary.Visibility = Visibility.Collapsed;
-
-            Staff_Label_JobTitle.Content = "";
-            Staff_Label_JobTitle.Visibility = Visibility.Visible;
-            Staff_ComboBox_JobTitle.Visibility = Visibility.Collapsed;
-
-            Staff_Label_Password.Visibility = Visibility.Collapsed;
-            Staff_TextBox_Password.Visibility = Visibility.Collapsed;
-
-            Staff_Button_Reduct.IsEnabled = true;
-            Staff_Button_Ok.IsEnabled = false;
-            Staff_Button_Cancel.IsEnabled = false;
+            String saved_login = Staff_Label_Login.Content.ToString();
 
             string sql = "";
 
@@ -1985,10 +2002,12 @@ namespace DataBase_Medical.Windows
                                     $"\"Staff_Patronymic\" = '{Staff_TextBox_Patronymic.Text}', " +
                                     $"\"Staff_Department_Id\" = '{dep_id}', " +
                                     $"\"Staff_Category_Id\" = '{cat_id}', " +
-                                    $"\"Staff_Salary\" = '{Staff_TextBox_Salary.Text}', " +
-                                    $"\"Staff_Login\" = '{Staff_TextBox_Login.Text}';\n" +
+                                    $"\"Staff_Salary\" = '{Staff_TextBox_Salary.Text}'" +
+                                    (Staff_TextBox_Login.Text == saved_login ? "" : $", \"Staff_Login\" = '{Staff_TextBox_Login.Text}'") +
+                                    $" Where \"Staff_Id\" = {Staff_Selected_Id};\n" +
                                     (Staff_TextBox_Password.Text.Length is 0 ? "" : $"Select change_password('{Staff_TextBox_Login.Text}', '{Staff_TextBox_Password.Text}');\n") +
                                     $"Call add_user_to_{JobTitles.Where(x => x.Value == Staff_ComboBox_JobTitle.Text).First().Key}s_group('{Staff_TextBox_Login.Text}')";
+                sql = sql.Replace("\'NULL\'", "NULL");
             }
 
             var conn = ConnectionCarrier.Carrier.Connection;
@@ -2000,7 +2019,17 @@ namespace DataBase_Medical.Windows
             }
             catch (Exception ex)
             {
-                throw;
+                if (ex.Message.Contains("change department"))
+                {
+                    MessageBox.Show($"Невозможно изменить отделение{Environment.NewLine}У данного доктора есть пациенты в старом отделении",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    MessageBox.Show($"Непредвиденная ошибка{Environment.NewLine}{ex.Message}",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                return;
             }
             finally
             {
@@ -2034,6 +2063,7 @@ namespace DataBase_Medical.Windows
                         sql += $" Where lower(\"Department_Name\") Like '%{Staff_ComboBox_SearchData.Text.ToLower()}%'";
                     }
                 }
+                sql += " Order By \"Staff_Id\"";
 
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
@@ -2046,6 +2076,318 @@ namespace DataBase_Medical.Windows
 
                 this.Staff_DataGrid.ItemsSource = new DataView(dt);
                 this.Staff_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+        }
+
+        #endregion
+
+        #region Patient
+
+        string? Patient_Selected_Id = string.Empty;
+        Dictionary<String, string> SocialStatus = new();
+
+        private async void Patient_Load_Data(String id)
+        {
+            Dictionary<String, String> data;
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"Select * From \"Patient_Full\" Where \"Patient_Id\" = {id}";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                data = this.NpgsqlDataReader_To_Dictionary(reader, new Dictionary<string, string>()
+                {
+                    { "id", "Patient_Id" },
+                    { "Имя", "Patient_Name" },
+                    { "Фамилия", "Patient_Surname" },
+                    { "Отчество", "Patient_Patronymic" },
+                    { "Дата рождения", "Patient_BirthDay" },
+                    { "Социальное положение", "SocialStatus_Name" }
+                });
+
+                Patient_Label_Surname.Content = data["Фамилия"];
+                Patient_Label_Name.Content = data["Имя"];
+                Patient_Label_Patronymic.Content = data["Отчество"];
+                Patient_Label_Birthday.Content = data["Дата рождения"].Split(' ')[0];
+                Patient_Label_SocialStatus.Content = data["Социальное положение"];
+            }
+            catch
+            {
+                throw;
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+        }
+
+        private async void Patient_MenuItem_Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            Patient_Label_Surname.Content = "";
+            Patient_Label_Surname.Visibility = Visibility.Visible;
+            Patient_TextBox_Surname.Visibility = Visibility.Collapsed;
+
+            Patient_Label_Name.Content = "";
+            Patient_Label_Name.Visibility = Visibility.Visible;
+            Patient_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            Patient_Label_Patronymic.Content = "";
+            Patient_Label_Patronymic.Visibility = Visibility.Visible;
+            Patient_TextBox_Patronymic.Visibility = Visibility.Collapsed;
+
+            Patient_Label_SocialStatus.Content = "";
+            Patient_Label_SocialStatus.Visibility = Visibility.Visible;
+            Patient_ComboBox_SocialStatus.Visibility = Visibility.Collapsed;
+
+            Patient_Label_Birthday.Content = "";
+            Patient_Label_Birthday.Visibility = Visibility.Visible;
+            Patient_Label_Birthday_l.Visibility = Visibility.Visible;
+
+            Patient_Button_Reduct.IsEnabled = true;
+            Patient_Button_Ok.IsEnabled = false;
+            Patient_Button_Cancel.IsEnabled = false;
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = "Select * FROM \"Patient_SurnameNP\" Order By \"Patient_Id\"";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "id", "Patient_Id" },
+                    { "ФИО", "Patient_SurnameNP" },
+                });
+
+                this.Patient_DataGrid.ItemsSource = new DataView(dt);
+                this.Patient_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+            if (Patient_Selected_Id != string.Empty)
+            {
+                Patient_Load_Data(Patient_Selected_Id);
+            }
+            else
+            {
+                RaiseFirstSelection(Patient_DataGrid);
+            }
+        }
+
+        private void Patient_MenuItem_Search_Click(object sender, RoutedEventArgs e)
+        {
+            this.Patient_Grid_Search.Visibility =
+               this.Patient_Grid_Search.Visibility is Visibility.Visible ?
+               Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void Patient_DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            if (Patient_DataGrid.SelectedIndex is -1)
+                return;
+
+            Patient_Label_Surname.Content = "";
+            Patient_Label_Surname.Visibility = Visibility.Visible;
+            Patient_TextBox_Surname.Visibility = Visibility.Collapsed;
+
+            Patient_Label_Name.Content = "";
+            Patient_Label_Name.Visibility = Visibility.Visible;
+            Patient_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            Patient_Label_Patronymic.Content = "";
+            Patient_Label_Patronymic.Visibility = Visibility.Visible;
+            Patient_TextBox_Patronymic.Visibility = Visibility.Collapsed;
+
+            Patient_Label_SocialStatus.Content = "";
+            Patient_Label_SocialStatus.Visibility = Visibility.Visible;
+            Patient_ComboBox_SocialStatus.Visibility = Visibility.Collapsed;
+
+            Patient_Label_Birthday.Content = "";
+            Patient_Label_Birthday.Visibility = Visibility.Visible;
+            Patient_Label_Birthday_l.Visibility = Visibility.Visible;
+
+            Patient_Button_Reduct.IsEnabled = true;
+            Patient_Button_Ok.IsEnabled = false;
+            Patient_Button_Cancel.IsEnabled = false;
+
+            var vs = Patient_DataGrid.SelectedIndex;
+            var row = Patient_DataGrid.Items[vs] as DataRowView;
+            Patient_Selected_Id = row?["id"].ToString();
+
+            Patient_Load_Data(Patient_Selected_Id);
+        }
+
+        private async void Patient_Button_Reduct_Click(object sender, RoutedEventArgs e)
+        {
+            if (Patient_Selected_Id == String.Empty)
+                return;
+
+            Patient_Label_Surname.Visibility = Visibility.Collapsed;
+            Patient_TextBox_Surname.Visibility = Visibility.Visible;
+
+            Patient_Label_Name.Visibility = Visibility.Collapsed;
+            Patient_TextBox_Name.Visibility = Visibility.Visible;
+
+            Patient_Label_Patronymic.Visibility = Visibility.Collapsed;
+            Patient_TextBox_Patronymic.Visibility = Visibility.Visible;
+
+            Patient_Label_SocialStatus.Visibility = Visibility.Collapsed;
+            Patient_ComboBox_SocialStatus.Visibility = Visibility.Visible;
+
+            Patient_Label_Birthday.Visibility = Visibility.Collapsed;
+            Patient_Label_Birthday_l.Visibility = Visibility.Collapsed;
+
+            Patient_Button_Reduct.IsEnabled = false;
+            Patient_Button_Ok.IsEnabled = true;
+            Patient_Button_Cancel.IsEnabled = true;
+
+            Patient_TextBox_Surname.Text = Patient_Label_Surname.Content.ToString();
+            Patient_TextBox_Name.Text = Patient_Label_Name.Content.ToString();
+            Patient_TextBox_Patronymic.Text = Patient_Label_Patronymic.Content.ToString();
+
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = "Select * From \"SocialStatus\"";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                SocialStatus.Clear();
+                SocialStatus = this.NpgsqlDataReader_To_DictionaryList(reader, "SocialStatus_Id", "SocialStatus_Name");
+                SocialStatus.Add("NULL", "");
+                reader.Close();
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+            Patient_ComboBox_SocialStatus.ItemsSource = SocialStatus.Values.OrderBy(x => x).ToArray();
+            Patient_ComboBox_SocialStatus.SelectedIndex = Patient_ComboBox_SocialStatus.Items.IndexOf(Patient_Label_SocialStatus.Content);
+        }
+
+        private void Patient_Button_Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            Patient_Label_Surname.Visibility = Visibility.Visible;
+            Patient_TextBox_Surname.Visibility = Visibility.Collapsed;
+
+            Patient_Label_Name.Visibility = Visibility.Visible;
+            Patient_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            Patient_Label_Patronymic.Visibility = Visibility.Visible;
+            Patient_TextBox_Patronymic.Visibility = Visibility.Collapsed;
+
+            Patient_Label_SocialStatus.Visibility = Visibility.Visible;
+            Patient_ComboBox_SocialStatus.Visibility = Visibility.Collapsed;
+
+            Patient_Label_Birthday.Visibility = Visibility.Visible;
+            Patient_Label_Birthday_l.Visibility = Visibility.Visible;
+
+            Patient_Button_Reduct.IsEnabled = true;
+            Patient_Button_Ok.IsEnabled = false;
+            Patient_Button_Cancel.IsEnabled = false;
+        }
+
+        private async void Patient_Button_Ok_Click(object sender, RoutedEventArgs e)
+        {
+            if (Patient_TextBox_Surname.Text.Length is 0)
+            {
+                MessageBox.Show($"Фамилия пациента не может быть пустой",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            if (Patient_TextBox_Name.Text.Length is 0)
+            {
+                MessageBox.Show($"Имя пациента не может быть пустым",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            if (Patient_TextBox_Patronymic.Text.Length is 0)
+            {
+                MessageBox.Show($"Отчество пациента не может быть пустым",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var soc_id = SocialStatus.Where(x => x.Value == Patient_ComboBox_SocialStatus.Text).First().Key;
+            var sql = $"Update \"Patient\" Set " +
+                                $"\"Patient_Name\" = '{Patient_TextBox_Name.Text}', " +
+                                $"\"Patient_Surname\" = '{Patient_TextBox_Surname.Text}', " +
+                                $"\"Patient_Patronymic\" = '{Patient_TextBox_Patronymic.Text}', " +
+                                $"\"Patient_SocialStatus_Id\" = '{soc_id}' " +
+                                $"Where \"Patient_Id\" = {Patient_Selected_Id}";
+            sql = sql.Replace("\'NULL\'", "NULL");
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
+
+                Patient_Label_Name.Content = Patient_TextBox_Name.Text;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Непредвиденная ошибка{Environment.NewLine}{ex.Message}",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+
+            Patient_MenuItem_Refresh_Click(sender, e);
+        }
+
+        private async void Patient_Button_SearchData_Click(object sender, RoutedEventArgs e)
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+
+                String sql = $"Select * FROM \"Patient_SurnameNP\"";
+
+                if (Patient_TextBox_SearchData.Text.Length is not 0)
+                {
+                    sql += $" Where lower(\"Patient_SurnameNP\") Like '%{Patient_TextBox_SearchData.Text.ToLower()}%' Order By \"Patient_Id\"";
+                }
+
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "id", "Patient_Id" },
+                    { "ФИО", "Patient_SurnameNP" }
+                });
+
+                this.Patient_DataGrid.ItemsSource = new DataView(dt);
+                this.Patient_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
             }
             catch
             {

@@ -10,7 +10,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         
         Title="Администратор: Иванов И.И." 
-        Height="550" Width="700"
+        Height="550" Width="950"
         MinHeight="400" MinWidth="0"
         
         Loaded="Window_Loaded">
@@ -35,7 +35,7 @@
         <Grid x:Name="Grid_Patient" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" MaxWidth="250"/>
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
@@ -48,19 +48,19 @@
                 </Grid.RowDefinitions>
 
                 <Menu Grid.Row="1" Style="{StaticResource Menu_Style}">
-                    <MenuItem>
+                    <MenuItem Click="Patient_MenuItem_Refresh_Click">
                         <MenuItem.Header>
                             <materialDesign:PackIcon Kind="Refresh" Height="19" Width="19"/>
                         </MenuItem.Header>
                     </MenuItem>
-                    <MenuItem>
+                    <MenuItem Click="Patient_MenuItem_Search_Click">
                         <MenuItem.Header>
                             <materialDesign:PackIcon Kind="Search" Height="19" Width="19"/>
                         </MenuItem.Header>
                     </MenuItem>
                 </Menu>
 
-                <Grid Grid.Row="2" Visibility="Collapsed">
+                <Grid x:Name="Patient_Grid_Search" Grid.Row="2" Visibility="Collapsed">
                     <!--Инфа для поиска-->
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -75,23 +75,15 @@
                     <Label Grid.Row="0" Style="{StaticResource InfoField_Style}" FontSize="12">
                         ФИО:
                     </Label>
-                    <RibbonTextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
-
-                    <Button Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
+                    <RibbonTextBox Name="Patient_TextBox_SearchData" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
+                    <Button x:Name="Patient_Button_SearchData" Click="Patient_Button_SearchData_Click" Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
                 </Grid> <!--Поиск-->
 
-                <DataGrid Grid.Row="3"
-                  Style="{StaticResource DataGrid_Style}"
-                  CanUserAddRows="False" CanUserDeleteRows="False"
-                  IsReadOnly="True">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn>
-                            <DataGridTextColumn.Header>
-                                ФИО
-                            </DataGridTextColumn.Header>
-                        </DataGridTextColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <DataGrid Grid.Row="3" x:Name="Patient_DataGrid" MaxWidth="250"
+                      Style="{StaticResource DataGrid_Style}"
+                      CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
+                      SelectedCellsChanged="Patient_DataGrid_SelectedCellsChanged"
+                      IsReadOnly="True" />
 
                 <Label Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource InfoTitle_Style}" FontSize="20">
                     Список пациентов
@@ -130,53 +122,35 @@
                     <Label Grid.Row="1" Style="{StaticResource InfoField_Style}">
                         Фамилия:
                     </Label>
-                    <Label Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Иванов
-                    </Label>
-                    <RibbonTextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Иванов" />
+                    <Label Name="Patient_Label_Surname" MinWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <RibbonTextBox x:Name="Patient_TextBox_Surname" MinWidth="150" MaxWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Иванов" />
 
                     <!--Имя-->
                     <Label Grid.Row="2" Style="{StaticResource InfoField_Style}">
                         Имя:
                     </Label>
-                    <Label Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Иван
-                    </Label>
-                    <RibbonTextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Иван" />
+                    <Label Name="Patient_Label_Name" MinWidth="150" Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <RibbonTextBox x:Name="Patient_TextBox_Name" MinWidth="150" MaxWidth="150" Grid.Row="2" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Иван" />
 
                     <!--Отчество-->
                     <Label Grid.Row="3" Style="{StaticResource InfoField_Style}">
                         Отчество:
                     </Label>
-                    <Label Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Иванович
-                    </Label>
-                    <RibbonTextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Иванович" />
+                    <Label Name="Patient_Label_Patronymic" MinWidth="150" Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <RibbonTextBox Name="Patient_TextBox_Patronymic" MinWidth="150" MaxWidth="150" Grid.Row="3" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Иванович" />
 
                     <!--Социальное положение-->
                     <Label Grid.Row="4" Grid.Column="0" Style="{StaticResource InfoField_Style}">
                         Соц. положение:
                     </Label>
-                    <Label Grid.Row="4" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Рабочий
-                    </Label>
-                    <ComboBox Grid.Row="4" Grid.Column="1" Style="{StaticResource ComboBox_Style}" Visibility="Collapsed">
-                        <ComboBox.Items>
-                            <ComboBoxItem>Рабочий</ComboBoxItem>
-                            <ComboBoxItem>Пенсионер</ComboBoxItem>
-                        </ComboBox.Items>
-                    </ComboBox>
+                    <Label Name="Patient_Label_SocialStatus" MinWidth="150" Grid.Row="4" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <ComboBox Name="Patient_ComboBox_SocialStatus" MinWidth="150" MaxWidth="150" Grid.Row="4" Grid.Column="1" Style="{StaticResource ComboBox_Style}" Visibility="Collapsed" />
 
                     <!--Дата рождения-->
-                    <Label Grid.Row="5" Grid.Column="0" Style="{StaticResource InfoField_Style}">
-                        <TextBlock>
-                            Дата рождения:
-                        </TextBlock>
+                    <Label Name="Patient_Label_Birthday_l" Grid.Row="5" Grid.Column="0" Style="{StaticResource InfoField_Style}">
+                        Дата рождения:
                     </Label>
-                    <Label Grid.Row="5" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        10.11.1986
-                    </Label>
-                    <DatePicker Grid.Row="5" Grid.Column="1" Style="{StaticResource DatePicker_Style}"  Visibility="Collapsed" Text="10.11.1986"/>
+                    <Label Name="Patient_Label_Birthday" Grid.Row="5" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
 
                     <!--Кнопки редактирования, подтверждения редактирования и его отмены-->
                     <Grid Grid.Row="7" Grid.ColumnSpan="2" Visibility="Visible">
@@ -185,9 +159,15 @@
                             <ColumnDefinition></ColumnDefinition>
                             <ColumnDefinition></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <Button Grid.Column="0" Content="Редактировать" Margin="0, 0, 10, 0" Style="{StaticResource Button_Style}" IsEnabled="True"/>
-                        <Button Grid.Column="1" Content="Отмена" Margin="5, 7, 0, 7" Style="{StaticResource Button_Style}" IsEnabled="False"/>
-                        <Button Grid.Column="2" Content="Ок" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}" IsEnabled="False"/>
+                        <Button x:Name="Patient_Button_Reduct" Grid.Column="0" 
+                                Content="Редактировать" Style="{StaticResource Button_Style}" 
+                                IsEnabled="True" Click="Patient_Button_Reduct_Click"/>
+                        <Button x:Name="Patient_Button_Cancel" Grid.Column="1" 
+                                Content="Отмена" Style="{StaticResource Button_Style}" 
+                                IsEnabled="False" Click="Patient_Button_Cancel_Click"/>
+                        <Button x:Name="Patient_Button_Ok" Grid.Column="2" 
+                                Content="Ок" Style="{StaticResource Button_Style}" 
+                                IsEnabled="False" Click="Patient_Button_Ok_Click"/>
                     </Grid>
 
                 </Grid>
@@ -196,10 +176,10 @@
             
         </Grid> <!--Больные-->
 
-        <Grid x:Name="Grid_Staff" Grid.Row="1" Visibility="Visible">
+        <Grid x:Name="Grid_Staff" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" MaxWidth="350"/>
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
@@ -255,7 +235,7 @@
                     <Label Grid.Row="0" Style="{StaticResource InfoField_Style}" FontSize="12">
                         ФИО:
                     </Label>
-                    <RibbonTextBox Name="Staff_TextBox_SearchData" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
+                    <RibbonTextBox Name="Staff_TextBox_SearchData" MinWidth="100" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
 
                     <Label Grid.Row="1" Style="{StaticResource InfoField_Style}" FontSize="12">
                         Отделение:
@@ -265,7 +245,7 @@
                     <Button Name="Staff_Button_SearchData" Click="Staff_Button_SearchData_Click" Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
                 </Grid> <!--Поиск-->
 
-                <DataGrid Grid.Row="3" x:Name="Staff_DataGrid"
+                <DataGrid Grid.Row="3" x:Name="Staff_DataGrid" MaxWidth="350"
                       Style="{StaticResource DataGrid_Style}"
                       CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
                       SelectedCellsChanged="Staff_DataGrid_SelectedCellsChanged"
@@ -306,70 +286,70 @@
                     <Label Grid.Row="1" Style="{StaticResource InfoField_Style}">
                         Фамилия:
                     </Label>
-                    <Label Name="Staff_Label_Surname" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
-                    <RibbonTextBox Name="Staff_TextBox_Surname" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Иванов" />
+                    <Label Name="Staff_Label_Surname" MinWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <RibbonTextBox Name="Staff_TextBox_Surname" MinWidth="150" MaxWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Иванов" />
 
                     <!--Имя-->
                     <Label Grid.Row="2" Style="{StaticResource InfoField_Style}">
                         Имя:
                     </Label>
-                    <Label Name="Staff_Label_Name" Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
-                    <RibbonTextBox Name="Staff_TextBox_Name" Grid.Row="2" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Иван" />
+                    <Label Name="Staff_Label_Name" MinWidth="150" Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <RibbonTextBox Name="Staff_TextBox_Name" MinWidth="150" MaxWidth="150" Grid.Row="2" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Иван" />
 
                     <!--Отчество-->
                     <Label Grid.Row="3" Style="{StaticResource InfoField_Style}">
                         Отчество:
                     </Label>
-                    <Label Name="Staff_Label_Patronymic" Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
-                    <RibbonTextBox Name="Staff_TextBox_Patronymic" Grid.Row="3" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Иванович" />
+                    <Label Name="Staff_Label_Patronymic" MinWidth="150" Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <RibbonTextBox Name="Staff_TextBox_Patronymic" MinWidth="150" MaxWidth="150" Grid.Row="3" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Иванович" />
 
                     <!--Отделение-->
                     <Label Grid.Row="4" Grid.Column="0" Style="{StaticResource InfoField_Style}">
                         Отделение:
                     </Label>
-                    <Label Name="Staff_Label_Department" Grid.Row="4" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
-                    <ComboBox Name="Staff_ComboBox_Department" Grid.Row="4" Grid.Column="1" Style="{StaticResource ComboBox_Style}" Visibility="Collapsed" />
+                    <Label Name="Staff_Label_Department" MinWidth="150" Grid.Row="4" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <ComboBox Name="Staff_ComboBox_Department" MinWidth="150" MaxWidth="150" Grid.Row="4" Grid.Column="1" Style="{StaticResource ComboBox_Style}" Visibility="Collapsed" />
 
                     <!--Категория-->
                     <Label Grid.Row="1" Grid.Column="2" Margin="20, 0, 0, 0" Style="{StaticResource InfoField_Style}">
                         Категория:
                     </Label>
-                    <Label Name="Staff_Label_Category" Grid.Row="1" Grid.Column="3" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
-                    <ComboBox Name="Staff_ComboBox_Category" Grid.Row="1" Grid.Column="3" Style="{StaticResource ComboBox_Style}" Visibility="Collapsed" />
+                    <Label Name="Staff_Label_Category" MinWidth="150" Grid.Row="1" Grid.Column="3" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <ComboBox Name="Staff_ComboBox_Category" MinWidth="150" MaxWidth="150" Grid.Row="1" Grid.Column="3" Style="{StaticResource ComboBox_Style}" Visibility="Collapsed" />
 
                     <!--Дата принятия на работу-->
                     <Label Grid.Row="2" Grid.Column="2" Margin="20, 0, 0, 0" Style="{StaticResource InfoField_Style}">
                         Принят на работу:
                     </Label>
-                    <Label Name="Staff_Label_Date" Grid.Row="2" Grid.Column="3" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
-                    <DatePicker Name="Staff_DatePicker_Date" Grid.Row="2" Grid.Column="3" Style="{StaticResource DatePicker_Style}"  Visibility="Collapsed" Text="10.11.1986"/>
+                    <Label Name="Staff_Label_Date" MinWidth="150" Grid.Row="2" Grid.Column="3" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <DatePicker Name="Staff_DatePicker_Date" MinWidth="150" MaxWidth="150" Grid.Row="2" Grid.Column="3" Style="{StaticResource DatePicker_Style}"  Visibility="Collapsed" Text="10.11.1986"/>
 
                     <!--Оклад-->
                     <Label Grid.Row="3" Grid.Column="2" Margin="20, 0, 0, 0" Style="{StaticResource InfoField_Style}" Visibility="Visible">
                         Оклад:
                     </Label>
-                    <Label Name="Staff_Label_Salary" Grid.Row="3" Grid.Column="3" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
-                    <RibbonTextBox Name="Staff_TextBox_Salary" Grid.Row="3" Grid.Column="3" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="20000 руб." />
+                    <Label Name="Staff_Label_Salary" MinWidth="150" Grid.Row="3" Grid.Column="3" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <RibbonTextBox Name="Staff_TextBox_Salary" MinWidth="150" MaxWidth="150" Grid.Row="3" Grid.Column="3" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="20000 руб." />
 
                     <!--Должность-->
                     <Label Grid.Row="4" Grid.Column="2" Margin="20, 0, 0, 0" Style="{StaticResource InfoField_Style}" Visibility="Visible">
                         Должность:
                     </Label>
-                    <Label Name="Staff_Label_JobTitle" Grid.Row="4" Grid.Column="3" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
-                    <ComboBox Name="Staff_ComboBox_JobTitle" Grid.Row="4" Grid.Column="3" Style="{StaticResource ComboBox_Style}" Visibility="Collapsed" />
+                    <Label Name="Staff_Label_JobTitle" MinWidth="150" Grid.Row="4" Grid.Column="3" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <ComboBox Name="Staff_ComboBox_JobTitle" MinWidth="150" MaxWidth="150" Grid.Row="4" Grid.Column="3" Style="{StaticResource ComboBox_Style}" Visibility="Collapsed" />
 
                     <!--Логин-->
                     <Label Grid.Row="5" Grid.Column="0" Style="{StaticResource InfoField_Style}">
                         Логин:
                     </Label>
-                    <Label Name="Staff_Label_Login" Grid.Row="5" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
-                    <RibbonTextBox Name="Staff_TextBox_Login" Grid.Row="5" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="doctor123" />
+                    <Label Name="Staff_Label_Login" MinWidth="150" Grid.Row="5" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <RibbonTextBox Name="Staff_TextBox_Login" MinWidth="150" MaxWidth="150" Grid.Row="5" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="doctor123" />
 
                     <!--Пароль-->
                     <Label Name="Staff_Label_Password" Grid.Row="5" Grid.Column="2" Margin="20, 0, 0, 0" Style="{StaticResource InfoField_Style}" Visibility="Collapsed">
                         Пароль:
                     </Label>
-                    <RibbonTextBox Name="Staff_TextBox_Password" Grid.Row="5" Grid.Column="3" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="qwerty" />
+                    <RibbonTextBox Name="Staff_TextBox_Password" MinWidth="150" MaxWidth="150" Grid.Row="5" Grid.Column="3" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="qwerty" />
 
                     <!--Кнопки редактирования, подтверждения редактирования и его отмены-->
                     <Grid Grid.Row="7" Grid.ColumnSpan="4" Visibility="Visible">
@@ -399,7 +379,7 @@
         <Grid x:Name="Grid_Department" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" MaxWidth="300"/>
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
@@ -454,12 +434,12 @@
                     <Label Grid.Row="0" Style="{StaticResource InfoField_Style}" FontSize="12">
                         Название:
                     </Label>
-                    <RibbonTextBox Name="Department_TextBox_SearchData" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
+                    <RibbonTextBox Name="Department_TextBox_SearchData" MinWidth="150" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
                     <Button Name="Department_Button_SearchData" Click="Department_Button_SearchData_Click" Grid.Row="1" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
                 </Grid>
                 <!--Поиск-->
 
-                <DataGrid Grid.Row="3" x:Name="Department_DataGrid"
+                <DataGrid Grid.Row="3" x:Name="Department_DataGrid" MaxWidth="300"
                       Style="{StaticResource DataGrid_Style}"
                       CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
                       SelectedCellsChanged="Department_DataGrid_SelectedCellsChanged"
@@ -496,22 +476,22 @@
                     <Label Grid.Row="1" Style="{StaticResource InfoField_Style}">
                         Название:
                     </Label>
-                    <Label Name="Department_Label_Name" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
-                    <RibbonTextBox Name="Department_TextBox_Name" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Травматология" />
+                    <Label Name="Department_Label_Name" MinWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <RibbonTextBox Name="Department_TextBox_Name" MinWidth="150" MaxWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Травматология" />
 
                     <!--Телефон-->
                     <Label Grid.Row="2" Style="{StaticResource InfoField_Style}">
                         Телефон:
                     </Label>
-                    <Label Name="Department_Label_Phone" Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
-                    <RibbonTextBox Name="Department_TextBox_Phone" Grid.Row="2" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="+7(949)-359-45-65 " />
+                    <Label Name="Department_Label_Phone" MinWidth="150" Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <RibbonTextBox Name="Department_TextBox_Phone" MinWidth="150" MaxWidth="150" Grid.Row="2" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="+7(949)-359-45-65 " />
 
                     <!--Число коек-->
                     <Label Grid.Row="3" Style="{StaticResource InfoField_Style}">
                         Число коек:
                     </Label>
-                    <Label Name="Department_Label_Beds" Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
-                    <RibbonTextBox Name="Department_TextBox_Beds" Grid.Row="3" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="35" />
+                    <Label Name="Department_Label_Beds" MinWidth="150" Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <RibbonTextBox Name="Department_TextBox_Beds" MinWidth="150" MaxWidth="150" Grid.Row="3" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="35" />
 
                     <!--Кнопки редактирования, подтверждения редактирования и его отмены-->
                     <Grid Grid.Row="5" Grid.ColumnSpan="4" Visibility="Visible">
@@ -542,7 +522,7 @@
         <Grid x:Name="Grid_Disease" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" MaxWidth="250"/>
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
@@ -587,12 +567,12 @@
                     <Label Grid.Row="0" Style="{StaticResource InfoField_Style}" FontSize="12">
                         Название:
                     </Label>
-                    <RibbonTextBox Name="Disease_TextBox_SearchData" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
+                    <RibbonTextBox Name="Disease_TextBox_SearchData" MinWidth="150" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
                     <Button Name="Disease_Button_SearchData" Click="Disease_Button_SearchData_Click" Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
                 </Grid>
                 <!--Поиск-->
 
-                <DataGrid Grid.Row="3" x:Name="Disease_DataGrid"
+                <DataGrid Grid.Row="3" x:Name="Disease_DataGrid" MaxWidth="250"
                       Style="{StaticResource DataGrid_Style}"
                       CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
                       SelectedCellsChanged="Disease_DataGrid_SelectedCellsChanged"
@@ -632,8 +612,8 @@
                     <Label Grid.Row="1" Style="{StaticResource InfoField_Style}">
                         Название:
                     </Label>
-                    <Label Name="Disease_Label_Name" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible"/>
-                    <RibbonTextBox Name="Disease_TextBox_Name" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Грипп" />
+                    <Label Name="Disease_Label_Name" MinWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible"/>
+                    <RibbonTextBox Name="Disease_TextBox_Name" MinWidth="150" MaxWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Грипп" />
 
                     <!--Кнопки редактирования, подтверждения редактирования и его отмены-->
                     <Grid Grid.Row="3" Grid.ColumnSpan="2" Visibility="Visible">
@@ -662,7 +642,7 @@
         <Grid x:Name="Grid_Procedure" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" MaxWidth="250"/>
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
@@ -707,11 +687,11 @@
                     <Label Grid.Row="0" Style="{StaticResource InfoField_Style}" FontSize="12">
                         Название:
                     </Label>
-                    <RibbonTextBox Name="Procedure_TextBox_SearchData" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
+                    <RibbonTextBox Name="Procedure_TextBox_SearchData" MinWidth="150" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
                     <Button Name="Procedure_Button_SearchData" Click="Procedure_Button_SearchData_Click" Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
                 </Grid>
                 <!--Поиск-->
-                <DataGrid Grid.Row="3" x:Name="Procedure_DataGrid"
+                <DataGrid Grid.Row="3" x:Name="Procedure_DataGrid" MaxWidth="250"
                       Style="{StaticResource DataGrid_Style}"
                       CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
                       SelectedCellsChanged="Procedure_DataGrid_SelectedCellsChanged"
@@ -750,8 +730,8 @@
                     <Label Grid.Row="1" Style="{StaticResource InfoField_Style}">
                         Название:
                     </Label>
-                    <Label Name="Procedure_Label_Name" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible"/>
-                    <RibbonTextBox Name="Procedure_TextBox_Name" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Пенсионер" />
+                    <Label Name="Procedure_Label_Name" MinWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible"/>
+                    <RibbonTextBox Name="Procedure_TextBox_Name" MinWidth="150" MaxWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Пенсионер" />
 
                     <!--Кнопки редактирования, подтверждения редактирования и его отмены-->
                     <Grid Grid.Row="3" Grid.ColumnSpan="2" Visibility="Visible">
@@ -778,10 +758,10 @@
 
         </Grid> <!--Процедуры-->
 
-        <Grid x:Name="Grid_SocialStatus" Grid.Row="1" Visibility="Collapsed">
+        <Grid x:Name="Grid_SocialStatus" Grid.Row="1" Visibility="Visible">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" MaxWidth="300"/>
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
@@ -826,12 +806,12 @@
                     <Label Grid.Row="0" Style="{StaticResource InfoField_Style}" FontSize="12">
                         Название:
                     </Label>
-                    <RibbonTextBox Name="SocialStatus_TextBox_SearchData" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
+                    <RibbonTextBox Name="SocialStatus_TextBox_SearchData" MinWidth="150" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
                     <Button Name="SocialStatus_Button_SearchData" Click="SocialStatus_Button_SearchData_Click" Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
                 </Grid>
                 <!--Поиск-->
 
-                <DataGrid Grid.Row="3" x:Name="SocialStatus_DataGrid"
+                <DataGrid Grid.Row="3" x:Name="SocialStatus_DataGrid" MaxWidth="300"
                       Style="{StaticResource DataGrid_Style}"
                       CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
                       SelectedCellsChanged="SocialStatus_DataGrid_SelectedCellsChanged"
@@ -869,8 +849,8 @@
                     <Label Grid.Row="1" Style="{StaticResource InfoField_Style}">
                         Название:
                     </Label>
-                    <Label Name="SocialStatus_Label_Name" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible"/>
-                    <RibbonTextBox Name="SocialStatus_TextBox_Name" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Пенсионер" />
+                    <Label Name="SocialStatus_Label_Name" MinWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible"/>
+                    <RibbonTextBox Name="SocialStatus_TextBox_Name" MinWidth="150" MaxWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Пенсионер" />
 
                     <!--Кнопки редактирования, подтверждения редактирования и его отмены-->
                     <Grid Grid.Row="3" Grid.ColumnSpan="2" Visibility="Visible">
@@ -900,7 +880,7 @@
         <Grid x:Name="Grid_Category" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" MaxWidth="250"/>
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
@@ -945,18 +925,16 @@
                     <Label Grid.Row="0" Style="{StaticResource InfoField_Style}" FontSize="12">
                         Название:
                     </Label>
-                    <RibbonTextBox Name="Category_TextBox_SearchData" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
-
+                    <RibbonTextBox Name="Category_TextBox_SearchData" MinWidth="150" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
                     <Button x:Name="Category_Button_SearchData" Click="Category_Button_SearchData_Click" Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
                 </Grid>
                 <!--Поиск-->
 
-                <DataGrid Grid.Row="3" x:Name="Category_DataGrid"
+                <DataGrid Grid.Row="3" x:Name="Category_DataGrid" MaxWidth="250"
                       Style="{StaticResource DataGrid_Style}"
                       CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
                       SelectedCellsChanged="Category_DataGrid_SelectedCellsChanged"
                       IsReadOnly="True" />
-
 
                 <Label Grid.Row="0" Grid.ColumnSpan="2" Style="{StaticResource InfoTitle_Style}" FontSize="20">
                     Список категорий
@@ -990,10 +968,8 @@
                     <Label Grid.Row="1" Style="{StaticResource InfoField_Style}">
                         Название:
                     </Label>
-                    <Label Name="Category_Label_Name" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        
-                    </Label>
-                    <RibbonTextBox x:Name="Category_TextBox_Name" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Высшая" />
+                    <Label Name="Category_Label_Name" MinWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+                    <RibbonTextBox x:Name="Category_TextBox_Name" MinWidth="150" MaxWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Высшая" />
 
                     <!--Кнопки редактирования, подтверждения редактирования и его отмены-->
                     <Grid Grid.Row="3" Grid.ColumnSpan="2" Visibility="Visible">
@@ -1019,7 +995,6 @@
             <!--Инфа о категории-->
             
         </Grid> <!--Категории-->
-        
 
     </Grid>
 </Window>
