@@ -76,9 +76,9 @@ namespace DataBase_Medical.Windows
                 await reader.ReadAsync();
                 str = reader.GetString(0);
             }
-            catch
+            catch (Exception ex)
             {
-
+                throw;
             }
             finally
             {

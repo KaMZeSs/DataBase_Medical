@@ -211,9 +211,9 @@ namespace DataBase_Medical.Windows
 
                 Category_Label_Name.Content = data["Название категории"];
             }
-            catch
+            catch (Exception ex) 
             {
-                throw;
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -438,9 +438,9 @@ namespace DataBase_Medical.Windows
 
                 SocialStatus_Label_Name.Content = data["Название социального статуса"];
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -662,13 +662,15 @@ namespace DataBase_Medical.Windows
                 {
                     { "id", "Procedure_Id" },
                     { "Название процедуры", "Procedure_Name" },
+                    { "Стоимость процедуры", "Procedure_Cost" }
                 });
 
                 Procedure_Label_Name.Content = data["Название процедуры"];
+                Procedure_Label_Cost.Content = data["Стоимость процедуры"];
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -681,6 +683,10 @@ namespace DataBase_Medical.Windows
             Procedure_Label_Name.Content = "";
             Procedure_Label_Name.Visibility = Visibility.Visible;
             Procedure_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            Procedure_Label_Cost.Content = "";
+            Procedure_Label_Cost.Visibility = Visibility.Visible;
+            Procedure_TextBox_Cost.Visibility = Visibility.Collapsed;
 
             Procedure_Button_Reduct.IsEnabled = true;
             Procedure_Button_Ok.IsEnabled = false;
@@ -734,11 +740,15 @@ namespace DataBase_Medical.Windows
             Procedure_Label_Name.Visibility = Visibility.Collapsed;
             Procedure_TextBox_Name.Visibility = Visibility.Visible;
 
+            Procedure_Label_Cost.Visibility = Visibility.Collapsed;
+            Procedure_TextBox_Cost.Visibility = Visibility.Visible;
+
             Procedure_Button_Reduct.IsEnabled = false;
             Procedure_Button_Ok.IsEnabled = true;
             Procedure_Button_Cancel.IsEnabled = true;
 
             Procedure_TextBox_Name.Text = "";
+            Procedure_TextBox_Cost.Text = "";
         }
 
         private void Procedure_DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
@@ -747,6 +757,9 @@ namespace DataBase_Medical.Windows
                 return;
             Procedure_Label_Name.Visibility = Visibility.Visible;
             Procedure_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            Procedure_Label_Cost.Visibility = Visibility.Visible;
+            Procedure_TextBox_Cost.Visibility = Visibility.Collapsed;
 
             Procedure_Button_Reduct.IsEnabled = true;
             Procedure_Button_Ok.IsEnabled = false;
@@ -769,17 +782,24 @@ namespace DataBase_Medical.Windows
             Procedure_Label_Name.Visibility = Visibility.Collapsed;
             Procedure_TextBox_Name.Visibility = Visibility.Visible;
 
+            Procedure_Label_Cost.Visibility = Visibility.Collapsed;
+            Procedure_TextBox_Cost.Visibility = Visibility.Visible;
+
             Procedure_Button_Reduct.IsEnabled = false;
             Procedure_Button_Ok.IsEnabled = true;
             Procedure_Button_Cancel.IsEnabled = true;
 
             Procedure_TextBox_Name.Text = Procedure_Label_Name.Content.ToString();
+            Procedure_TextBox_Cost.Text = Procedure_Label_Cost.Content.ToString();
         }
 
         private void Procedure_Button_Cancel_Click(object sender, RoutedEventArgs e)
         {
             Procedure_Label_Name.Visibility = Visibility.Visible;
             Procedure_TextBox_Name.Visibility = Visibility.Collapsed;
+
+            Procedure_Label_Cost.Visibility = Visibility.Visible;
+            Procedure_TextBox_Cost.Visibility = Visibility.Collapsed;
 
             Procedure_Button_Reduct.IsEnabled = true;
             Procedure_Button_Ok.IsEnabled = false;
@@ -795,46 +815,48 @@ namespace DataBase_Medical.Windows
                 return;
             }
 
+            try
+            {
+                Double.Parse(Procedure_TextBox_Cost.Text);
+            }
+            catch
+            {
+                MessageBox.Show($"Невозможно считать стоимость. Повторите ввод",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
             string sql;
             if (!isReducting)
             {
                 Procedure_Selected_Id = (await ConnectionCarrier.Carrier.GetCurrentSequenceId("Procedure")).ToString();
-                sql = $"Insert Into \"Procedure\" (\"Procedure_Name\") Values ('{Procedure_TextBox_Name.Text}')";
+                sql = $"Insert Into \"Procedure\" (\"Procedure_Name\", \"Procedure_Cost\") Values ('{Procedure_TextBox_Name.Text}', '{Procedure_TextBox_Cost.Text}')";
             }
             else
             {
-                sql = $"Update \"Procedure\" Set \"Procedure_Name\" = '{Procedure_TextBox_Name.Text}' Where \"Procedure_Id\" = {Procedure_Selected_Id}";
+                sql = $"Update \"Procedure\" Set \"Procedure_Name\" = '{Procedure_TextBox_Name.Text}', " +
+                    $"\"Procedure_Cost\" = '{Procedure_TextBox_Cost.Text}' Where \"Procedure_Id\" = {Procedure_Selected_Id}";
             }
 
-            if (!isReducting | (isReducting & Procedure_Label_Name.Content.ToString() != Procedure_TextBox_Name.Text))
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
             {
-                var conn = ConnectionCarrier.Carrier.Connection;
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
 
-                try
-                {
-                    await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                    await new NpgsqlCommand(sql, conn).ExecuteNonQueryAsync();
+                Procedure_Label_Name.Content = Procedure_TextBox_Name.Text;
+            }
+            catch (Exception ex)
+            {
 
-                    Procedure_Label_Name.Content = Procedure_TextBox_Name.Text;
-                }
-                catch (Exception ex)
-                {
-                    if (ex.Message.Contains("повторяющееся"))
-                    {
-                        MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
-                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                    else
-                    {
-                        MessageBox.Show($"Непредвиденная ошибка{Environment.NewLine}{ex.Message}",
-                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                    return;
-                }
-                finally
-                {
-                    await conn.CloseAsync();
-                }
+                MessageBox.Show($"Непредвиденная ошибка{Environment.NewLine}{ex.Message}",
+                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            finally
+            {
+                await conn.CloseAsync();
             }
 
             Procedure_MenuItem_Refresh_Click(sender, e);
@@ -894,9 +916,9 @@ namespace DataBase_Medical.Windows
 
                 Disease_Label_Name.Content = data["Название заболевания"];
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -1126,9 +1148,9 @@ namespace DataBase_Medical.Windows
                 Department_Label_Phone.Content = data["Телефон отделения"];
                 Department_Label_Beds.Content = data["Койки отделения"];
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -1493,9 +1515,9 @@ namespace DataBase_Medical.Windows
                 Staff_Label_Login.Content = data["Логн"];
                 Staff_Label_JobTitle.Content = JobTitles.Where(x => x.Key == data["Должность"]).FirstOrDefault().Value;
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -2121,9 +2143,9 @@ namespace DataBase_Medical.Windows
                 Patient_Label_Birthday.Content = data["Дата рождения"].Split(' ')[0];
                 Patient_Label_SocialStatus.Content = data["Социальное положение"];
             }
-            catch
+            catch (Exception ex)
             {
-                throw;
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {

@@ -11,8 +11,10 @@
         
         Style="{StaticResource Window_Style}"
         
+        Loaded="Window_Loaded"
+        
         Title="Врач: Иванов И.И." 
-        Height="500" Width="1140"
+        Height="700" Width="1140"
         MinHeight="400" MinWidth="1130">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -33,19 +35,19 @@
             </Label>
 
             <Menu Grid.Row="1" Style="{StaticResource Menu_Style}">
-                <MenuItem>
+                <MenuItem Click="Patient_MenuItem_Refresh_Click">
                     <MenuItem.Header>
                         <materialDesign:PackIcon Kind="Refresh" Height="19" Width="19"/>
                     </MenuItem.Header>
                 </MenuItem>
-                <MenuItem>
+                <MenuItem Click="Patient_MenuItem_Search_Click">
                     <MenuItem.Header>
                         <materialDesign:PackIcon Kind="Search" Height="19" Width="19"/>
                     </MenuItem.Header>
                 </MenuItem>
             </Menu>
 
-            <Grid Grid.Row="2" Visibility="Collapsed"> <!--Инфа для поиска-->
+            <Grid x:Name="Patient_Grid_Search" Grid.Row="2" Visibility="Collapsed"> <!--Инфа для поиска-->
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition />
@@ -59,42 +61,23 @@
                 <Label Grid.Row="0" Style="{StaticResource InfoField_Style}" FontSize="12">
                     ФИО:
                 </Label>
-                <RibbonTextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
-
-                <Button Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
+                <RibbonTextBox Name="Patient_TextBox_SearchData" MinWidth="150" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
+                <Button Name="Patient_Button_SearchData" Click="Patient_Button_SearchData_Click" Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
             </Grid>
 
-            <ListBox Grid.Row="3">
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-                <ListBoxItem>Иванов И.И.</ListBoxItem>
-            </ListBox>
+            <DataGrid Grid.Row="3" x:Name="Patient_DataGrid" MaxWidth="250"
+                      Style="{StaticResource DataGrid_Style}"
+                      CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
+                      SelectedCellsChanged="Patient_DataGrid_SelectedCellsChanged"
+                      IsReadOnly="True"/>
 
         </Grid> <!--Список пациентов-->
 
         <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
-                <RowDefinition ></RowDefinition>
+                <RowDefinition Height="300" MinHeight="300"></RowDefinition>
+                <RowDefinition></RowDefinition>
             </Grid.RowDefinitions>
 
 
@@ -105,8 +88,7 @@
             <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
-                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
                 </Grid.ColumnDefinitions>
 
                 <Grid Grid.Row="0" Grid.Column="0" Width="Auto" Visibility="Visible">
@@ -118,93 +100,50 @@
                         <RowDefinition Height="50" />
                         <RowDefinition Height="50" />
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition></ColumnDefinition>
                         <ColumnDefinition></ColumnDefinition>
                     </Grid.ColumnDefinitions>
 
-                    <Button Grid.Row="7" Grid.ColumnSpan="2" Content="История болезней" Margin="5, 7, 0, 7" 
-                            Style="{StaticResource Button_Style}"/>
-
                     <!--Фамилия-->
                     <Label Grid.Row="0" Style="{StaticResource InfoField_Style}">
                         Фамилия:
                     </Label>
-                    <Label Grid.Row="0" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Иванов
-                    </Label>
+                    <Label Name="Patient_Label_Surname" Grid.Row="0" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
 
                     <!--Имя-->
                     <Label Grid.Row="1" Style="{StaticResource InfoField_Style}">
                         Имя:
                     </Label>
-                    <Label Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Иван
-                    </Label>
+                    <Label Name="Patient_Label_Name" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
 
                     <!--Отчество-->
                     <Label Grid.Row="2" Style="{StaticResource InfoField_Style}">
                         Отчество:
                     </Label>
-                    <Label Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Иванович
-                    </Label>
+                    <Label Name="Patient_Label_Patronymic" Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
 
                     <!--Социальное положение-->
                     <Label Grid.Row="3" Grid.Column="0" Style="{StaticResource InfoField_Style}">
                         Соц. положение:
                     </Label>
-                    <Label Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Рабочий
-                    </Label>
+                    <Label Name="Patient_Label_SocialStatus" Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
 
                     <!--Дата рождения-->
                     <Label Grid.Row="4" Grid.Column="0" Style="{StaticResource InfoField_Style}">
-                        <TextBlock>
-                            Дата рождения:
-                        </TextBlock>
+                        Дата рождения:
                     </Label>
-                    <Label Grid.Row="4" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        10.11.1986
-                    </Label>
+                    <Label Name="Patient_Label_Birthday" Grid.Row="4" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
 
                     <!--Отделение (для врача)-->
                     <Label Grid.Row="5" Grid.Column="0" Style="{StaticResource InfoField_Style}" Visibility="Visible">
                         В отделении:
                     </Label>
-                    <Label Grid.Row="5" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Не записан
-                    </Label>
+                    <Label Name="Patient_Label_Department" Grid.Row="5" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
                 </Grid>
-                <Grid Grid.Row="0" Grid.Column="1">
-                    <Grid>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"></RowDefinition>
-                            <RowDefinition></RowDefinition>
-                            <RowDefinition Height="Auto"></RowDefinition>
-                        </Grid.RowDefinitions>
-                        <Label Grid.Row="0" Style="{StaticResource InfoTitle_Style}" FontSize="20">
-                            Текущие назначения
-                        </Label>
-                        <DataGrid AutoGenerateColumns="True" Grid.Row="1" Width="500" 
-                              Style="{StaticResource DataGrid_Style}" 
-                              CanUserAddRows="False" CanUserDeleteRows="False" 
-                              IsReadOnly="True">
-                        </DataGrid>
-                        <Grid Grid.Row="2" Height="Auto">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition></ColumnDefinition>
-                                <ColumnDefinition></ColumnDefinition>
-                            </Grid.ColumnDefinitions>
 
-                            <Button Grid.Column="0" Content="Изменить" Margin="5, 7, 0, 7" Style="{StaticResource Button_Style}" IsEnabled="False"/>
-                            <Button Grid.Column="1" Content="Отменить" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}" IsEnabled="False"/>
-                        </Grid>
-                    </Grid>
-                </Grid>
-                <Grid Grid.Row="0" Grid.Column="2" Width="230">
+                <Grid Grid.Row="0" Grid.Column="2">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"></RowDefinition>
                         <RowDefinition></RowDefinition>
@@ -213,19 +152,58 @@
                     <Label Grid.Row="0" Style="{StaticResource InfoTitle_Style}" FontSize="20">
                         Список болезней
                     </Label>
-                    <DataGrid AutoGenerateColumns="True" Grid.Row="1"
-                              Style="{StaticResource DataGrid_Style}" 
-                              CanUserAddRows="False" CanUserDeleteRows="False" 
-                              IsReadOnly="True" Width="230">
-                    </DataGrid>
-                    <Grid Grid.Row="2" Height="Auto" Width="230" Visibility="Visible" >
+                    
+                    <DataGrid x:Name="Patient_Diseases_DataGrid" 
+                                  AutoGenerateColumns="True" Grid.Row="1"
+                                  Style="{StaticResource DataGrid_Style}"  
+                                  CanUserAddRows="False" CanUserDeleteRows="False"  
+                                  SelectionMode="Single"
+                                  SelectedCellsChanged="Patient_Diseases_SelectedCellsChanged"
+                                  IsReadOnly="True" />
+
+                    <Grid Grid.Row="2" Height="Auto" Visibility="Visible" >
                         <Grid.ColumnDefinitions>
+                            <ColumnDefinition></ColumnDefinition>
                             <ColumnDefinition></ColumnDefinition>
                             <ColumnDefinition></ColumnDefinition>
                         </Grid.ColumnDefinitions>
 
-                        <Button Grid.Column="0" Content="Добавить" Margin="5, 7, 0, 7" Style="{StaticResource Button_Style}" IsEnabled="True"/>
-                        <Button Grid.Column="1" Content="Вылечена" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}" IsEnabled="False"/>
+                        <Button Grid.Column="0" Click="Patient_Diseases_Button_Add_Click" Content="Добавить" Margin="5, 7, 0, 7" Style="{StaticResource Button_Style}" />
+                        <Button Grid.Column="1" Click="Patient_Diseases_Button_Remove_Click" Content="Вылечена" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}" />
+                        <Button Grid.Column="2" Click="Patient_Diseases_Button_History_Click" Content="История" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}" />
+                    </Grid>
+                </Grid>
+            </Grid>
+
+            <Grid Grid.Row="2">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition></RowDefinition>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Label Name="Appointment_Title_Label" Grid.Row="0" Style="{StaticResource InfoTitle_Style}" FontSize="20">
+                        Текущие назначения
+                    </Label>
+                    <DataGrid x:Name="Patient_CurrAppointment_DataGrid" 
+                                  AutoGenerateColumns="True" Grid.Row="1"
+                                  Style="{StaticResource DataGrid_Style}"  
+                                  CanUserAddRows="False" CanUserDeleteRows="False"  
+                                  SelectionMode="Single"
+                                  SelectedCellsChanged="Patient_CurrAppointment_SelectedCellsChanged"
+                                  IsReadOnly="True" />
+
+                    <Grid Grid.Row="2" Height="Auto">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition></ColumnDefinition>
+                            <ColumnDefinition></ColumnDefinition>
+                            <ColumnDefinition></ColumnDefinition>
+                        </Grid.ColumnDefinitions>
+
+                        <Button Click="Patient_CurrAppointment_Add_Button_Click" Grid.Column="0" Content="Добавить" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}"/>
+                        <Button Click="Patient_CurrAppointment_Cancel_Button_Click" Grid.Column="1" Content="Отменить" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}"/>
+                        <Button Click="Patient_CurrAppointment_History_Button_Click" Grid.Column="2" Content="История" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}"/>
+                        
                     </Grid>
                 </Grid>
             </Grid>

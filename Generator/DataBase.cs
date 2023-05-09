@@ -109,17 +109,20 @@ namespace Generator
         {
             public int procedure_id;
             public string procedure_name;
+            public double procedure_cost;
 
             public static Procedure[] GetProcedures(String[] strings)
             {
                 var procedures = new List<Procedure>();
                 int i = 0;
+                Random random = new Random();
                 foreach (var c in strings)
                 {
                     procedures.Add(new Procedure
                     {
                         procedure_id = i,
-                        procedure_name = c
+                        procedure_name = c,
+                        procedure_cost = random.Next(10000)
                     });
                     i++;
                 }
@@ -129,7 +132,7 @@ namespace Generator
 
             public override string ToString()
             {
-                return $"({procedure_id + 1}, \'{procedure_name}\')";
+                return $"({procedure_id + 1}, \'{procedure_name}\', \'{procedure_cost}\')";
             }
         }
 
@@ -235,11 +238,6 @@ namespace Generator
                         .GetRandomDateInRange(new DateTime(1960, 1, 1), DateTime.Now));
                 var fio = PartOfName.GenerateFIO(firstNames, midNames, lastNames);
                 var login = "chief";
-                //var login = StaticMethods<object>.GenerateRandomString(12);
-                //while (staff_list.Where(x => x.staff_login == login).Any())
-                //{
-                //    login = StaticMethods<object>.GenerateRandomString(12);
-                //}
                 staff_list.Add(new Staff
                 {
                     staff_id = index,
@@ -283,11 +281,6 @@ namespace Generator
                             .GetRandomDateInRange(new DateTime(1960, 1, 1), DateTime.Now));
                         fio = PartOfName.GenerateFIO(firstNames, midNames, lastNames);
                         login = $"doctor_{department.department_id}_{i}";
-                        //login = StaticMethods<object>.GenerateRandomString(12);
-                        //while (staff_list.Where(x => x.staff_login == login).Any())
-                        //{
-                        //    login = StaticMethods<object>.GenerateRandomString(12);
-                        //}
                         staff_list.Add(new Staff
                         {
                             staff_id = index,
@@ -308,11 +301,6 @@ namespace Generator
                             .GetRandomDateInRange(new DateTime(1960, 1, 1), DateTime.Now));
                     fio = PartOfName.GenerateFIO(firstNames, midNames, lastNames);
                     login = $"doctor_{department.department_id}";
-                    //login = StaticMethods<object>.GenerateRandomString(12);
-                    //while (staff_list.Where(x => x.staff_login == login).Any())
-                    //{
-                    //    login = StaticMethods<object>.GenerateRandomString(12);
-                    //}
                     staff_list.Add(new Staff
                     {
                         staff_id = index,
@@ -448,7 +436,7 @@ namespace Generator
             public int hospitalStay_Department_id;
 
             public static HospitalStay[] GenerateHospitalStays(int count_per_patient,
-                Patient[] patients, Department[] departments)
+                Patient[] patients, Department[] departments, Staff[] staff)
             {
                 var rnd = new Random();
                 var hospitalStays = new List<HospitalStay>();
@@ -481,6 +469,13 @@ namespace Generator
                                 hospitalStay_Start_Date = DateOnly.FromDateTime(start),
                                 hospitalStay_End_Date = c < dep.department_beds ? DateOnly.MinValue : end
                             });
+                            var hs = hospitalStays.Last();
+                            if (hs.hospitalStay_End_Date == DateOnly.MinValue)
+                            {
+                                var p = patients.Where(x => x.patient_id == hs.hospitalStay_Patient_id).First();
+                                var doctors = staff.Where(x => x.staff_Department_id == hs.hospitalStay_Department_id);
+                                p.patient_CurrentDoctor_id = doctors.ElementAt(rnd.Next(doctors.Count())).staff_id;
+                            }
                         }
                         else
                         {
@@ -540,7 +535,7 @@ namespace Generator
                     for (int i = 0; i < count_per_patient; i++)
                     {
                         var start = StaticMethods<int>.GetRandomDateTimeInRange(patient.patient_Birthday.ToDateTime(TimeOnly.MinValue), DateTime.Now);
-                        var interval = TimeSpan.FromHours(rnd.Next(1, 100));
+                        var interval = TimeSpan.FromHours(rnd.Next(1, 1000));
                         doctorAppointments.Add(new DoctorAppointment()
                         {
                             doctorAppointment_id = doctorAppointments.Count,
@@ -549,7 +544,7 @@ namespace Generator
                             doctorAppointment_procedure_id = procedures[rnd.Next(procedures.Length)].procedure_id,
                             doctorAppointment_Start_Date = start,
                             doctorAppointment_interval = interval,
-                            doctorAppointment_Count = rnd.Next(1, 100)
+                            doctorAppointment_Count = rnd.Next(1, 500)
                         });
                     }
                 }
@@ -608,7 +603,7 @@ namespace Generator
             Console.WriteLine($"{DateTime.Now}: Генерация болезней пациентов");
             db.PatientDiseases_list = PatientDiseases.GeneratePatientDiseases(5, db.Patients, db.Diseases);
             Console.WriteLine($"{DateTime.Now}: Генерация нахождений пациентов");
-            db.HospitalStays = HospitalStay.GenerateHospitalStays(5, db.Patients, db.Departments);
+            db.HospitalStays = HospitalStay.GenerateHospitalStays(5, db.Patients, db.Departments, db.Staff_list);
             Console.WriteLine($"{DateTime.Now}: Генерация назначений врачей");
             db.DoctorAppointments = DoctorAppointment.GenerateDoctorAppointments(10, db.Patients, db.Staff_list, db.Procedures, db.JobTitles);
             Console.WriteLine($"{DateTime.Now}: Генерация данных завершена");
@@ -640,14 +635,14 @@ namespace Generator
             {
                 { "Category", "INSERT INTO \"Category\" (\"Category_Id\", \"Category_Name\") VALUES " },
                 { "Disease", "INSERT INTO \"Disease\" (\"Disease_Id\", \"Disease_Name\") VALUES " },
-                { "Procedure", "INSERT INTO \"Procedure\" (\"Procedure_Id\", \"Procedure_Name\") VALUES " },
+                { "Procedure", "INSERT INTO \"Procedure\" (\"Procedure_Id\", \"Procedure_Name\", \"Procedure_Cost\") VALUES " },
                 { "SocialStatus", "INSERT INTO \"SocialStatus\" (\"SocialStatus_Id\", \"SocialStatus_Name\") VALUES " },
                 { "Department", "INSERT INTO \"Department\" (\"Department_Id\", \"Department_Name\", \"Department_Beds\", \"Department_Phone\", \"Department_Exists\") VALUES " },
                 { "Staff", "INSERT INTO \"Staff\" (\"Staff_Id\", \"Staff_Name\", \"Staff_Surname\", \"Staff_Patronymic\", \"Staff_Department_Id\", \"Staff_Category_Id\", \"Staff_EmploymentDate\", \"Staff_Salary\", \"Staff_Login\") VALUES " },
                 { "Patient", "INSERT INTO \"Patient\" (\"Patient_Id\", \"Patient_Name\", \"Patient_Surname\", \"Patient_Patronymic\", \"Patient_BirthDay\", \"Patient_SocialStatus_Id\", \"Patient_CurrentDoctor_Id\") VALUES " },
                 { "PatientDiseases", "INSERT INTO \"PatientDiseases\" (\"PatientDiseases_Id\", \"PatientDiseases_Patient_Id\", \"PatientDiseases_Disease_Id\", \"PatientDiseases_Start_Date\", \"PatientDiseases_End_Date\") VALUES " },
                 { "HospitalStay", "INSERT INTO \"HospitalStay\" (\"HospitalStay_Id\", \"HospitalStay_Patient_Id\", \"HospitalStay_Start_Date\", \"HospitalStay_End_Date\", \"HospitalStay_Cost\", \"HospitalStay_Department_Id\") VALUES " },
-                { "DoctorAppointment", "INSERT INTO \"DoctorAppointment\" (\"DoctorAppointment_Id\", \"DoctorAppointment_Procedure_Id\", \"DoctorAppointment_Patient_id\", \"DoctorAppointment_Doctor_Id\", \"DoctorAppointment_Interval\", \"DoctorAppointment_Start_Date\", \"DoctorAppointment_Count\") VALUES " }
+                { "DoctorAppointment", "INSERT INTO \"DoctorAppointment\" (\"DoctorAppointment_Id\", \"DoctorAppointment_Procedure_Id\", \"DoctorAppointment_Patient_Id\", \"DoctorAppointment_Doctor_Id\", \"DoctorAppointment_Interval\", \"DoctorAppointment_Start_Date\", \"DoctorAppointment_Count\") VALUES " }
             };
 
             var Sequences = new Dictionary<string, string>()

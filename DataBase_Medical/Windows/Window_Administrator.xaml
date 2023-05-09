@@ -639,7 +639,7 @@
 
         </Grid> <!--Заболевания-->
 
-        <Grid x:Name="Grid_Procedure" Grid.Row="1" Visibility="Collapsed">
+        <Grid x:Name="Grid_Procedure" Grid.Row="1" Visibility="Visible">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" MaxWidth="250"/>
@@ -713,6 +713,7 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="60" />
                         <RowDefinition Height="50" />
+                        <RowDefinition Height="50" />
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="50" />
                     </Grid.RowDefinitions>
@@ -733,8 +734,15 @@
                     <Label Name="Procedure_Label_Name" MinWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible"/>
                     <RibbonTextBox Name="Procedure_TextBox_Name" MinWidth="150" MaxWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Пенсионер" />
 
+                    <!--Стоимость-->
+                    <Label Grid.Row="2" Style="{StaticResource InfoField_Style}">
+                        Стоимость:
+                    </Label>
+                    <Label Name="Procedure_Label_Cost" MinWidth="150" Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible"/>
+                    <RibbonTextBox Name="Procedure_TextBox_Cost" MinWidth="150" MaxWidth="150" Grid.Row="2" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Пенсионер" />
+
                     <!--Кнопки редактирования, подтверждения редактирования и его отмены-->
-                    <Grid Grid.Row="3" Grid.ColumnSpan="2" Visibility="Visible">
+                    <Grid Grid.Row="4" Grid.ColumnSpan="2" Visibility="Visible">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                             <ColumnDefinition></ColumnDefinition>
@@ -758,7 +766,7 @@
 
         </Grid> <!--Процедуры-->
 
-        <Grid x:Name="Grid_SocialStatus" Grid.Row="1" Visibility="Visible">
+        <Grid x:Name="Grid_SocialStatus" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" MaxWidth="300"/>

@@ -28,8 +28,31 @@ namespace DataBase_Medical.Windows
         {
             var loggin = this.Loggin_box.Text;
             var pswd = this.Password_box.Password;
-            ConnectionCarrier.CreateConnection(loggin, pswd);
-            var vs = await ConnectionCarrier.Carrier.GetCurrentJob();
+            string vs;
+            Task<String> task = null;
+            try
+            {
+                ConnectionCarrier.CreateConnection(loggin, pswd);
+                task = ConnectionCarrier.Carrier.GetCurrentJob();
+                
+                vs = await task;
+            }
+            catch
+            {
+                if (task.Exception.Message.StartsWith("28P01"))
+                {
+                    MessageBox.Show("Вы ввели неверный логин, или пароль.\nЕсли вы забыли логин, или пароль - обратитесь к администратору",
+                            "Ошибка входа");
+                }
+                return;
+            }
+
+            if (loggin is "postgres")
+            {
+                MessageBox.Show("Вы ввели неверный логин, или пароль.\nЕсли вы забыли логин, или пароль - обратитесь к администратору",
+                                "Ошибка входа");
+            }
+            
 
             switch (vs)
             {
@@ -61,7 +84,7 @@ namespace DataBase_Medical.Windows
                 {
                     MessageBox.Show("Вашей должности не существует.\nОбратитесь к администратору",
                         "Ошибка должности сотрудника");
-                    break;
+                    return;
                 }
             }
             this.Close();
