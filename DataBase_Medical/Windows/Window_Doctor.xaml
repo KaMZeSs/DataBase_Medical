@@ -149,11 +149,18 @@
                         <RowDefinition></RowDefinition>
                         <RowDefinition Height="Auto"></RowDefinition>
                     </Grid.RowDefinitions>
-                    <Label Name="Patient_Diseases_Title_Label" Grid.Row="0" Style="{StaticResource InfoTitle_Style}" FontSize="20">
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Name="Patient_Diseases_Title_Label" Grid.Row="0" Grid.ColumnSpan="3" Style="{StaticResource InfoTitle_Style}" FontSize="20">
                         Список текущих болезней
                     </Label>
-                    
-                    <DataGrid x:Name="Patient_Diseases_DataGrid" 
+
+                    <DataGrid x:Name="Patient_Diseases_DataGrid" Width="Auto" Grid.Column="1"
                                   AutoGenerateColumns="True" Grid.Row="1"
                                   Style="{StaticResource DataGrid_Style}"  
                                   CanUserAddRows="False" CanUserDeleteRows="False"  
@@ -161,7 +168,7 @@
                                   SelectedCellsChanged="Patient_Diseases_SelectedCellsChanged"
                                   IsReadOnly="True" />
 
-                    <Grid Grid.Row="2" Height="Auto" Visibility="Visible" >
+                    <Grid Grid.Row="2" Height="Auto" Visibility="Visible" Grid.ColumnSpan="3">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition></ColumnDefinition>
                             <ColumnDefinition></ColumnDefinition>
@@ -174,7 +181,7 @@
                         </Grid.RowDefinitions>
 
                         <Button Grid.Column="0" Click="Patient_Diseases_Button_Add_Click" Content="Добавить" Margin="5, 7, 0, 7" Style="{StaticResource Button_Style}" />
-                        <Button Grid.Column="1" Click="Patient_Diseases_Button_Remove_Click" Content="Вылечена" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}" />
+                        <Button Grid.Column="1" Name="Patient_Diseases_Button_Remove" Click="Patient_Diseases_Button_Remove_Click" Content="Вылечена" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}" />
                         <Button Grid.Column="2" Click="Patient_Diseases_Button_History_Click" Content="История" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}" />
                         <Button Grid.Column="3" Click="Patient_Diseases_Button_Filter_Click" Content="Фильтр" Margin="5, 7, 10, 7" Style="{StaticResource Button_Style}" />
 

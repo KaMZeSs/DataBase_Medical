@@ -61,7 +61,14 @@ namespace DataBase_Medical.Windows
                 // Fill the columns
                 foreach (var column in columns)
                 {
-                    dataRow[column.Key] = reader[column.Value];
+                    if (column.Key.Contains("Дата"))
+                    {
+                        dataRow[column.Key] = reader[column.Value].ToString().Split(' ')[0];
+                    }
+                    else
+                    {
+                        dataRow[column.Key] = reader[column.Value];
+                    }
                 }
 
                 dt.Rows.Add(dataRow);
@@ -171,6 +178,7 @@ namespace DataBase_Medical.Windows
             }
 
             Patient_Load_DoctorAppointments();
+            Patient_Load_Diseases();
         }
 
         private async void Patient_MenuItem_Refresh_Click(object sender, RoutedEventArgs e)
@@ -554,7 +562,6 @@ namespace DataBase_Medical.Windows
         string? CurrentDisease_Selected_Id = string.Empty;
         Dictionary<String, string> Diseases = new();
 
-        //TO CHECK
         private async void Patient_Load_Diseases()
         {
             var conn = ConnectionCarrier.Carrier.Connection;
@@ -567,7 +574,7 @@ namespace DataBase_Medical.Windows
 
                 Dictionary<String, String> dict = null;
 
-                if (isAppointmentHistory)
+                if (isDiseaseHistory)
                 {
                     dict = new Dictionary<string, string>()
                     {
@@ -604,7 +611,6 @@ namespace DataBase_Medical.Windows
             }
         }
 
-        //TO CHECK
         private void Patient_Diseases_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
             if (isDiseaseHistory)
@@ -619,7 +625,6 @@ namespace DataBase_Medical.Windows
             CurrentDisease_Selected_Id = row?["id"].ToString();
         }
 
-        //TO CHECK
         private async void Patient_Diseases_Button_Add_Click(object sender, RoutedEventArgs e)
         {
             if (isDiseaseHistory)
@@ -657,7 +662,6 @@ namespace DataBase_Medical.Windows
             Patient_Diseases_ComboBox.ItemsSource = Diseases.Values.OrderBy(x => x).ToArray();
         }
 
-        //TO CHECK
         private async void Patient_Diseases_Button_Add_Ok_Click(object sender, RoutedEventArgs e)
         {
             var dicease_id = Diseases.Where(x => x.Value == Patient_Diseases_ComboBox.Text).First().Key;
@@ -684,7 +688,6 @@ namespace DataBase_Medical.Windows
             Patient_Load_Diseases();
         }
 
-        //TO CHECK
         private async void Patient_Diseases_Button_Remove_Click(object sender, RoutedEventArgs e)
         {
             if (isDiseaseHistory)
@@ -711,7 +714,6 @@ namespace DataBase_Medical.Windows
             Patient_Load_Diseases();
         }
 
-        //TO CHECK
         private async void Patient_Diseases_Button_History_Click(object sender, RoutedEventArgs e)
         {
             isDiseaseHistory = !isDiseaseHistory;
@@ -719,28 +721,83 @@ namespace DataBase_Medical.Windows
             Patient_Diseases_Title_Label.Content = isDiseaseHistory ? "История болезней" : "Список текущих болезней";
 
             var button = sender as Button;
-            button.Content = isDiseaseHistory ? "История" : "Текущие";
+            button.Content = isDiseaseHistory ? "Текущие" : "История";
+            Patient_Diseases_Button_Remove.IsEnabled = !isDiseaseHistory;
+
+            this.Patient_Diseases_DatePicker_End.IsEnabled = isDiseaseHistory;
 
             Patient_Load_Diseases();
         }
 
-        //TO CHECK
         private async void Patient_Diseases_Button_Filter_Click(object sender, RoutedEventArgs e)
         {
             Patient_Diseases_Grid_Filter.Visibility = Patient_Diseases_Grid_Filter.Visibility is Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
 
-            this.Patient_Diseases_DatePicker_End.IsEnabled = !isDiseaseHistory;
+            this.Patient_Diseases_DatePicker_End.IsEnabled = isDiseaseHistory;
 
             this.Patient_Diseases_DatePicker_Start.SelectedDate = this.Patient_Diseases_DatePicker_End.SelectedDate = DateTime.Now;
         }
 
         private async void Patient_Diseases_Button_Filter_Ok_Click(object sender, RoutedEventArgs e)
         {
+            var start_date = Patient_Diseases_DatePicker_Start.SelectedDate;
+            var end_date = Patient_Diseases_DatePicker_End.SelectedDate;
 
+            if (isDiseaseHistory)
+            {
+                end_date = DateTime.Now;
+            }
+
+            var start = start_date.ToString().Split(' ')[0];
+            var end = end_date.ToString().Split(' ')[0];
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"SELECT * FROM get_patient_diseases({Patient_Selected_Id}, date('{start}'), date('{end}'))" 
+                    + (isDiseaseHistory ? "" : $" WHERE PatientDiseases_End_Date IS NULL");
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                Dictionary<String, String> dict = null;
+
+                if (isDiseaseHistory)
+                {
+                    dict = new Dictionary<string, string>()
+                    {
+                        { "id", "PatientDiseases_Id" },
+                        { "Заболевание", "Disease_Name" },
+                        { "Дата заболевания", "PatientDiseases_Start_Date" },
+                        { "Дата выздоровления", "PatientDiseases_End_Date" }
+                    };
+                }
+                else
+                {
+                    dict = new Dictionary<string, string>()
+                    {
+                        { "id", "PatientDiseases_Id" },
+                        { "Заболевание", "Disease_Name" },
+                        { "Дата заболевания", "PatientDiseases_Start_Date" }
+                    };
+                }
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, dict);
+
+                reader.Close();
+
+                this.Patient_Diseases_DataGrid.ItemsSource = new DataView(dt);
+                this.Patient_Diseases_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
         }
 
         #endregion
-
-
     }
 }
