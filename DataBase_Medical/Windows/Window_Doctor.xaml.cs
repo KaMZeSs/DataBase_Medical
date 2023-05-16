@@ -215,9 +215,9 @@ namespace DataBase_Medical.Windows
                 this.Patient_DataGrid.ItemsSource = new DataView(dt);
                 this.Patient_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
             }
-            catch
+            catch (Exception ex)
             {
-
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -275,7 +275,7 @@ namespace DataBase_Medical.Windows
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
 
-                String sql = $"Select * FROM \"Patient_SurnameNP\"";
+                String sql = $"Select * FROM \"PatientSurnameNP_Department\"";
 
                 if (Patient_TextBox_SearchData.Text.Length is not 0)
                 {
@@ -293,9 +293,9 @@ namespace DataBase_Medical.Windows
                 this.Patient_DataGrid.ItemsSource = new DataView(dt);
                 this.Patient_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
             }
-            catch
+            catch (Exception ex)
             {
-
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -470,7 +470,7 @@ namespace DataBase_Medical.Windows
             var hours = Int32.Parse(Appointment_Hours_TextBox.Text.Length is 0 ? "0" : Appointment_Hours_TextBox.Text);
             var minutes = Int32.Parse(Appointment_Minutes_TextBox.Text.Length is 0 ? "0" : Appointment_Minutes_TextBox.Text);
 
-            var interval = TimeSpan.FromDays(day) + TimeSpan.FromHours(hours) + TimeSpan.FromMinutes(minutes);
+            var interval = TimeSpan.FromDays(day) + TimeSpan.FromHours(hours) + TimeSpan.FromMinutes(minutes) + TimeSpan.FromSeconds(0);
 
             var count = Int32.Parse(Appointment_Count_TextBox.Text.Length is 0 ? "0" : Appointment_Count_TextBox.Text);
 
@@ -568,8 +568,8 @@ namespace DataBase_Medical.Windows
             try
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                String sql = $"Select * From \"{(isDiseaseHistory ? "All_PatientDiseases_Full" : "Current_PatientDiseases_Full")}\" " +
-                    $"Where \"PatientDiseases_Patient_Id\" = {Patient_Selected_Id}";
+                String sql = $"Select * From get_patient_diseases({Patient_Selected_Id}) " +
+                    $"{(isDiseaseHistory ? "" : " WHERE \"patientdiseases_end_date\" IS NULL")}";
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 Dictionary<String, String> dict = null;
@@ -578,19 +578,19 @@ namespace DataBase_Medical.Windows
                 {
                     dict = new Dictionary<string, string>()
                     {
-                        { "id", "PatientDiseases_Id" },
-                        { "Заболевание", "Disease_Name" },
-                        { "Дата заболевания", "PatientDiseases_Start_Date" },
-                        { "Дата выздоровления", "PatientDiseases_End_Date" }
+                        { "id", "patientdiseases_id" },
+                        { "Заболевание", "disease_name" },
+                        { "Дата заболевания", "patientdiseases_start_date" },
+                        { "Дата выздоровления", "patientdiseases_end_date" }
                     };
                 }
                 else
                 {
                     dict = new Dictionary<string, string>()
                     {
-                        { "id", "PatientDiseases_Id" },
-                        { "Заболевание", "Disease_Name" },
-                        { "Дата заболевания", "PatientDiseases_Start_Date" }
+                        { "id", "patientdiseases_id" },
+                        { "Заболевание", "disease_name" },
+                        { "Дата заболевания", "patientdiseases_start_date" }
                     };
                 }
 
@@ -755,8 +755,8 @@ namespace DataBase_Medical.Windows
             try
             {
                 await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
-                String sql = $"SELECT * FROM get_patient_diseases({Patient_Selected_Id}, date('{start}'), date('{end}'))" 
-                    + (isDiseaseHistory ? "" : $" WHERE PatientDiseases_End_Date IS NULL");
+                String sql = $"SELECT * FROM filter_patient_diseases(date('{start}'), date('{end}')) WHERE \"patientdiseases_patient_id\" = {Patient_Selected_Id}" 
+                    + (isDiseaseHistory ? "" : $" AND PatientDiseases_End_Date IS NULL");
                 var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
 
                 Dictionary<String, String> dict = null;

@@ -599,13 +599,13 @@ namespace Generator
             Console.WriteLine($"{DateTime.Now}: Генерация сотрудников");
             db.Staff_list = Staff.GenerateStaffList(150, db.Departments, db.Categories, db.JobTitles, first_names, second_names, last_names);
             Console.WriteLine($"{DateTime.Now}: Генерация пациентов");
-            db.Patients = Patient.GeneratePatients(500, db.SocialStatuses, db.Staff_list, first_names, second_names, last_names, db.JobTitles);
+            db.Patients = Patient.GeneratePatients(2000, db.SocialStatuses, db.Staff_list, first_names, second_names, last_names, db.JobTitles);
             Console.WriteLine($"{DateTime.Now}: Генерация болезней пациентов");
-            db.PatientDiseases_list = PatientDiseases.GeneratePatientDiseases(5, db.Patients, db.Diseases);
+            db.PatientDiseases_list = PatientDiseases.GeneratePatientDiseases(15, db.Patients, db.Diseases);
             Console.WriteLine($"{DateTime.Now}: Генерация нахождений пациентов");
-            db.HospitalStays = HospitalStay.GenerateHospitalStays(5, db.Patients, db.Departments, db.Staff_list);
+            db.HospitalStays = HospitalStay.GenerateHospitalStays(15, db.Patients, db.Departments, db.Staff_list);
             Console.WriteLine($"{DateTime.Now}: Генерация назначений врачей");
-            db.DoctorAppointments = DoctorAppointment.GenerateDoctorAppointments(10, db.Patients, db.Staff_list, db.Procedures, db.JobTitles);
+            db.DoctorAppointments = DoctorAppointment.GenerateDoctorAppointments(20, db.Patients, db.Staff_list, db.Procedures, db.JobTitles);
             Console.WriteLine($"{DateTime.Now}: Генерация данных завершена");
 
             return db;

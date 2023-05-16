@@ -133,6 +133,27 @@ namespace DataBase_Medical.Windows
             return str;
         }
 
+        public async Task<String> GetCurrentStaffDepartment()
+        {
+            var str = String.Empty;
+            try
+            {
+                await _connection.OpenAsync();
+                String sql = "Select \"Staff_Department_Id\" From \"Staff\" Where \"Staff_Login\" = session_user";
+                str = (await new NpgsqlCommand(sql, _connection).ExecuteScalarAsync()).ToString();
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await _connection.CloseAsync();
+            }
+
+            return str;
+        }
+
         public async Task<long> GetCurrentSequenceId(String column)
         {
             var sequence_name = String.Empty;

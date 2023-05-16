@@ -363,17 +363,33 @@ namespace DataBase_Medical.Windows
                 }
                 catch (Exception ex)
                 {
-                    if (ex.Message.Contains("повторяющееся"))
+                    if (isReducting)
                     {
-                        MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
-                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        if (ex.Message.Contains("повторяющееся"))
+                        {
+                        }
+                        else
+                        {
+                            MessageBox.Show($"Непредвиденная ошибка{Environment.NewLine}{ex.Message}",
+                                "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                            return;
+                        }
                     }
                     else
                     {
-                        MessageBox.Show($"Непредвиденная ошибка{Environment.NewLine}{ex.Message}",
-                            "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        if (ex.Message.Contains("повторяющееся"))
+                        {
+
+                            MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
+                                "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                        else
+                        {
+                            MessageBox.Show($"Непредвиденная ошибка{Environment.NewLine}{ex.Message}",
+                                "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        }
+                        return;
                     }
-                    return;
                 }
                 finally
                 {
@@ -2173,7 +2189,7 @@ namespace DataBase_Medical.Windows
 
             Patient_Label_Birthday.Content = "";
             Patient_Label_Birthday.Visibility = Visibility.Visible;
-            Patient_Label_Birthday_l.Visibility = Visibility.Visible;
+            Patient_DatePicker_Birthday.Visibility = Visibility.Collapsed;
 
             Patient_Button_Reduct.IsEnabled = true;
             Patient_Button_Ok.IsEnabled = false;
@@ -2244,7 +2260,7 @@ namespace DataBase_Medical.Windows
 
             Patient_Label_Birthday.Content = "";
             Patient_Label_Birthday.Visibility = Visibility.Visible;
-            Patient_Label_Birthday_l.Visibility = Visibility.Visible;
+            Patient_DatePicker_Birthday.Visibility = Visibility.Collapsed;
 
             Patient_Button_Reduct.IsEnabled = true;
             Patient_Button_Ok.IsEnabled = false;
@@ -2262,6 +2278,8 @@ namespace DataBase_Medical.Windows
             if (Patient_Selected_Id == String.Empty)
                 return;
 
+            isReducting = true;
+
             Patient_Label_Surname.Visibility = Visibility.Collapsed;
             Patient_TextBox_Surname.Visibility = Visibility.Visible;
 
@@ -2275,7 +2293,7 @@ namespace DataBase_Medical.Windows
             Patient_ComboBox_SocialStatus.Visibility = Visibility.Visible;
 
             Patient_Label_Birthday.Visibility = Visibility.Collapsed;
-            Patient_Label_Birthday_l.Visibility = Visibility.Collapsed;
+            Patient_DatePicker_Birthday.Visibility = Visibility.Visible;
 
             Patient_Button_Reduct.IsEnabled = false;
             Patient_Button_Ok.IsEnabled = true;
@@ -2284,7 +2302,9 @@ namespace DataBase_Medical.Windows
             Patient_TextBox_Surname.Text = Patient_Label_Surname.Content.ToString();
             Patient_TextBox_Name.Text = Patient_Label_Name.Content.ToString();
             Patient_TextBox_Patronymic.Text = Patient_Label_Patronymic.Content.ToString();
+            Patient_DatePicker_Birthday.Text = Patient_Label_Birthday.Content.ToString();
 
+            Patient_DatePicker_Birthday.DisplayDateEnd = DateTime.Now;
 
             var conn = ConnectionCarrier.Carrier.Connection;
             try
@@ -2325,7 +2345,7 @@ namespace DataBase_Medical.Windows
             Patient_ComboBox_SocialStatus.Visibility = Visibility.Collapsed;
 
             Patient_Label_Birthday.Visibility = Visibility.Visible;
-            Patient_Label_Birthday_l.Visibility = Visibility.Visible;
+            Patient_DatePicker_Birthday.Visibility = Visibility.Collapsed;
 
             Patient_Button_Reduct.IsEnabled = true;
             Patient_Button_Ok.IsEnabled = false;
@@ -2354,13 +2374,27 @@ namespace DataBase_Medical.Windows
             }
 
             var soc_id = SocialStatus.Where(x => x.Value == Patient_ComboBox_SocialStatus.Text).First().Key;
-            var sql = $"Update \"Patient\" Set " +
+
+            string sql;
+            if (!isReducting)
+            {
+                Patient_Selected_Id = (await ConnectionCarrier.Carrier.GetCurrentSequenceId("Patient")).ToString();
+                sql = $"Insert Into \"Patient\" " +
+                    $"(\"Patient_Name\", \"Patient_Surname\", \"Patient_Patronymic\", \"Patient_BirthDay\", \"Patient_SocialStatus_Id\") " +
+                    $"Values ('{Patient_TextBox_Name.Text}', '{Patient_TextBox_Surname.Text}', '{Patient_TextBox_Patronymic.Text}', " +
+                    $"'{Patient_DatePicker_Birthday.SelectedDate}', '{soc_id}')";
+                sql = sql.Replace("\'NULL\'", "NULL");
+            }
+            else
+            {
+                sql = $"Update \"Patient\" Set " +
                                 $"\"Patient_Name\" = '{Patient_TextBox_Name.Text}', " +
                                 $"\"Patient_Surname\" = '{Patient_TextBox_Surname.Text}', " +
                                 $"\"Patient_Patronymic\" = '{Patient_TextBox_Patronymic.Text}', " +
                                 $"\"Patient_SocialStatus_Id\" = '{soc_id}' " +
                                 $"Where \"Patient_Id\" = {Patient_Selected_Id}";
-            sql = sql.Replace("\'NULL\'", "NULL");
+                sql = sql.Replace("\'NULL\'", "NULL");
+            }
 
             var conn = ConnectionCarrier.Carrier.Connection;
 
@@ -2419,6 +2453,59 @@ namespace DataBase_Medical.Windows
             {
                 await conn.CloseAsync();
             }
+        }
+
+        private async void Patient_MenuItem_Add_Click(object sender, RoutedEventArgs e)
+        {
+            isReducting = false;
+
+            Patient_Label_Surname.Visibility = Visibility.Collapsed;
+            Patient_TextBox_Surname.Visibility = Visibility.Visible;
+
+            Patient_Label_Name.Visibility = Visibility.Collapsed;
+            Patient_TextBox_Name.Visibility = Visibility.Visible;
+
+            Patient_Label_Patronymic.Visibility = Visibility.Collapsed;
+            Patient_TextBox_Patronymic.Visibility = Visibility.Visible;
+
+            Patient_Label_SocialStatus.Visibility = Visibility.Collapsed;
+            Patient_ComboBox_SocialStatus.Visibility = Visibility.Visible;
+
+            Patient_Label_Birthday.Visibility = Visibility.Collapsed;
+            Patient_DatePicker_Birthday.Visibility = Visibility.Visible;
+
+            Patient_Button_Reduct.IsEnabled = false;
+            Patient_Button_Ok.IsEnabled = true;
+            Patient_Button_Cancel.IsEnabled = true;
+
+            Patient_TextBox_Surname.Text = "";
+            Patient_TextBox_Name.Text = "";
+            Patient_TextBox_Patronymic.Text = "";
+            Patient_DatePicker_Birthday.SelectedDate = DateTime.Now;
+            Patient_DatePicker_Birthday.DisplayDateEnd = DateTime.Now;
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = "Select * From \"SocialStatus\"";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                SocialStatus.Clear();
+                SocialStatus = this.NpgsqlDataReader_To_DictionaryList(reader, "SocialStatus_Id", "SocialStatus_Name");
+                SocialStatus.Add("NULL", "");
+                reader.Close();
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+            Patient_ComboBox_SocialStatus.ItemsSource = SocialStatus.Values.OrderBy(x => x).ToArray();
+            Patient_ComboBox_SocialStatus.SelectedIndex = Patient_ComboBox_SocialStatus.Items.IndexOf(Patient_Label_SocialStatus.Content);
         }
 
         #endregion
