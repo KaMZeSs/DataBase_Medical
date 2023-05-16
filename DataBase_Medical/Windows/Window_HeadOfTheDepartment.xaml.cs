@@ -60,6 +60,8 @@ namespace DataBase_Medical.Windows
             }
 
             this.Title += " : " + await ConnectionCarrier.Carrier.GetCurrentFIO();
+            this.Grid_Patient.Visibility = Visibility.Visible;
+            Patient_MenuItem_Refresh_Click(sender, e);
         }
 
         private async void MenuItem_Click(object sender, RoutedEventArgs e)
@@ -116,7 +118,15 @@ namespace DataBase_Medical.Windows
                 // Fill the columns
                 foreach (var column in columns)
                 {
-                    if (column.Key.Contains("Дата"))
+                    var dates_columns_list = new String[]
+                    {
+                        "Выписка",
+                        "Госпитализация",
+                        "Выздоровление",
+                        "Дата заболевания",
+                        "Заболевание"
+                    };
+                    if (dates_columns_list.Contains(column.Key))
                     {
                         dataRow[column.Key] = reader[column.Value].ToString().Split(' ')[0];
                     }
@@ -244,6 +254,7 @@ namespace DataBase_Medical.Windows
 
             Patient_Load_DoctorAppointments();
             Patient_Load_Diseases();
+            Patient_Load_Stays();
         }
 
         bool isAppointmentHistory = false;
@@ -323,9 +334,9 @@ namespace DataBase_Medical.Windows
                     dict = new Dictionary<string, string>()
                     {
                         { "id", "patientdiseases_id" },
-                        { "Заболевание", "disease_name" },
-                        { "Дата заболевания", "patientdiseases_start_date" },
-                        { "Дата выздоровления", "patientdiseases_end_date" }
+                        { "Болезнь", "disease_name" },
+                        { "Заболевание", "patientdiseases_start_date" },
+                        { "Выздоровление", "patientdiseases_end_date" }
                     };
                 }
                 else
@@ -333,7 +344,7 @@ namespace DataBase_Medical.Windows
                     dict = new Dictionary<string, string>()
                     {
                         { "id", "patientdiseases_id" },
-                        { "Заболевание", "disease_name" },
+                        { "Болезнь", "disease_name" },
                         { "Дата заболевания", "patientdiseases_start_date" }
                     };
                 }
@@ -344,6 +355,42 @@ namespace DataBase_Medical.Windows
 
                 this.Patient_Diseases_DataGrid.ItemsSource = new DataView(dt);
                 this.Patient_Diseases_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+        }
+
+        private async void Patient_Load_Stays()
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"Select * From \"HospitalStay_Full_Info\" Where \"HospitalStay_Patient_Id\" = {Patient_Selected_Id} ORDER BY \"HospitalStay_Start_Date\" DESC";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                Dictionary<String, String> dict = new Dictionary<string, string>()
+                    {
+                        { "id", "HospitalStay_Id" },
+                        { "Госпитализация", "HospitalStay_Start_Date" },
+                        { "Выписка", "HospitalStay_End_Date" },
+                        { "Отделение", "Department_Name" },
+                        { "Стоимость", "HospitalStay_Cost" },
+                        { "Полная сумма", "fullstay_cost" },
+                    };
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, dict);
+
+                reader.Close();
+
+                this.Patient_Stays_DataGrid.ItemsSource = new DataView(dt);
+                this.Patient_Stays_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
             }
             catch (Exception ex)
             {
