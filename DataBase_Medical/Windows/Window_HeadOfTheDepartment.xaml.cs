@@ -60,6 +60,7 @@ namespace DataBase_Medical.Windows
             }
 
             this.Title += " : " + await ConnectionCarrier.Carrier.GetCurrentFIO();
+            this.Grid_Department.Visibility = this.Grid_Staff.Visibility = this.Grid_Patient.Visibility = Visibility.Collapsed;
             this.Grid_Patient.Visibility = Visibility.Visible;
             Patient_MenuItem_Refresh_Click(sender, e);
         }
@@ -82,9 +83,9 @@ namespace DataBase_Medical.Windows
                 case "Персонал":
                 {
                     this.Grid_Staff.Visibility = Visibility.Visible;
-                    //Staff_MenuItem_Refresh_Click(sender, e);
-                    //await ConnectionCarrier.Carrier.WaitForConnectionAsync();
-                    //RaiseFirstSelection(Staff_DataGrid);
+                    Staff_MenuItem_Refresh_Click(sender, e);
+                    await ConnectionCarrier.Carrier.WaitForConnectionAsync();
+                    RaiseFirstSelection(Staff_DataGrid);
                     break;
                 }
                 case "Отделения":
@@ -106,6 +107,19 @@ namespace DataBase_Medical.Windows
         /// <param name="columns">Словарь значений, где Key - название колонки в DataTable и Value - название в reader</param>
         private DataTable NpgsqlDataReader_To_DataTable(NpgsqlDataReader reader, Dictionary<String, String> columns)
         {
+            var bool_columns_list = new String[]
+            {
+                "Госпитализирован"
+            };
+            var dates_columns_list = new String[]
+            {
+                "Выписка",
+                "Госпитализация",
+                "Выздоровление",
+                "Дата заболевания",
+                "Заболевание"
+            };
+
             DataTable dt = new DataTable();
             foreach (var column in columns)
             {
@@ -118,17 +132,14 @@ namespace DataBase_Medical.Windows
                 // Fill the columns
                 foreach (var column in columns)
                 {
-                    var dates_columns_list = new String[]
-                    {
-                        "Выписка",
-                        "Госпитализация",
-                        "Выздоровление",
-                        "Дата заболевания",
-                        "Заболевание"
-                    };
                     if (dates_columns_list.Contains(column.Key))
                     {
                         dataRow[column.Key] = reader[column.Value].ToString().Split(' ')[0];
+                    }
+                    else if (bool_columns_list.Contains(column.Key))
+                    {
+                        var vs = reader[column.Value].ToString();
+                        dataRow[column.Key] = vs == "True" ? "Да" : "Нет";
                     }
                     else
                     {
@@ -752,5 +763,235 @@ namespace DataBase_Medical.Windows
         #endregion
 
         #endregion
+
+        #region Staff
+
+        string? Staff_Selected_Id = string.Empty;
+        Dictionary<String, string> JobTitles = new()
+        {
+            { "chief", "Главный врач" },
+            { "department_chief", "Заведующий отделением" },
+            { "doctor" , "Врач" },
+            { "admin" , "Администратор" }
+        };
+
+
+        private async void Staff_Load_Data(String id)
+        {
+            Dictionary<String, String> data;
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"Select * From \"Staff_Full\" Where \"Staff_Id\" = {id} And role = 'doctor'";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                data = this.NpgsqlDataReader_To_Dictionary(reader, new Dictionary<string, string>()
+                {
+                    { "id", "Staff_Id" },
+                    { "Имя", "Staff_Name" },
+                    { "Фамилия", "Staff_Surname" },
+                    { "Отчество", "Staff_Patronymic" },
+                    { "Название отделения", "Department_Name" },
+                    { "Название категории", "Category_Name" },
+                    { "Должность", "role" }
+                });
+
+                Staff_Label_Name.Content = data["Имя"];
+                Staff_Label_Surname.Content = data["Фамилия"];
+                Staff_Label_Patronymic.Content = data["Отчество"];
+                Staff_Label_Department.Content = data["Название отделения"];
+                Staff_Label_Category.Content = data["Название категории"];
+                Staff_Label_JobTitle.Content = JobTitles.Where(x => x.Key == data["Должность"]).FirstOrDefault().Value;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+
+            Staff_Load_Patiens();
+        }
+
+        private async void Staff_MenuItem_Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = "Select * FROM \"Doctors_SurnameNP\"";
+                //String sql = "Select * FROM \"Staff_SurnameNP\" WHERE role = 'doctor' Order By \"Staff_Id\"";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "id", "Staff_Id" },
+                    { "ФИО", "Staff_SurnameNP" },
+                    { "Название отделения", "Department_Name" }
+                });
+
+
+                this.Staff_DataGrid.ItemsSource = new DataView(dt);
+                this.Staff_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+
+                List<string> values = Staff_DataGrid.Items.Cast<DataRowView>()
+                    .Select(row => row["Название отделения"].ToString())
+                    .Distinct()
+                    .ToList();
+                if (!values.Contains(""))
+                    values.Insert(0, "");
+                Staff_ComboBox_SearchData.ItemsSource = values;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+            if (Staff_Selected_Id != string.Empty)
+            {
+                Staff_Load_Data(Staff_Selected_Id);
+            }
+            else
+            {
+                RaiseFirstSelection(Staff_DataGrid);
+            }
+        }
+
+        private void Staff_MenuItem_Search_Click(object sender, RoutedEventArgs e)
+        {
+            this.Staff_Grid_Search.Visibility =
+               this.Staff_Grid_Search.Visibility is Visibility.Visible ?
+               Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void Staff_DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            if (Staff_DataGrid.SelectedIndex is -1)
+                return;
+
+            var vs = Staff_DataGrid.SelectedIndex;
+            var row = Staff_DataGrid.Items[vs] as DataRowView;
+            Staff_Selected_Id = row?["id"].ToString();
+
+            Staff_Load_Data(Staff_Selected_Id);
+        }
+
+        private async void Staff_Button_SearchData_Click(object sender, RoutedEventArgs e)
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"Select * FROM \"Doctors_SurnameNP\"";
+
+                if (Staff_TextBox_SearchData.Text.Length is not 0)
+                {
+                    sql += $" Where lower(\"Staff_SurnameNP\") Like '%{Staff_TextBox_SearchData.Text.ToLower()}%'";
+                }
+                if (Staff_ComboBox_SearchData.Text.Length is not 0)
+                {
+                    if (sql.Contains("Where"))
+                    {
+                        sql += $" And lower(\"Department_Name\") Like '%{Staff_ComboBox_SearchData.Text.ToLower()}%'";
+                    }
+                    else
+                    {
+                        sql += $" Where lower(\"Department_Name\") Like '%{Staff_ComboBox_SearchData.Text.ToLower()}%'";
+                    }
+                }
+
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "id", "Staff_Id" },
+                    { "ФИО", "Staff_SurnameNP" },
+                    { "Название отделения", "Department_Name" }
+                });
+
+                this.Staff_DataGrid.ItemsSource = new DataView(dt);
+                this.Staff_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+        }
+
+        private async void Staff_Load_Patiens()
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"Select * From \"Patient_SurnameNP_isHospitalized\" Where \"Patient_CurrentDoctor_Id\" = {Staff_Selected_Id}";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "id", "Patient_Id" },
+                    { "ФИО", "Patient_SurnameNP" },
+                    { "Госпитализирован", "isHospitalized" }
+                });
+
+                this.Staff_Patient_DataGrid.ItemsSource = new DataView(dt);
+                this.Staff_Patient_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+
+        }
+
+        private void Staff_Patient_DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (Staff_Patient_DataGrid.SelectedIndex is -1)
+                return;
+
+            var vs = Staff_Patient_DataGrid.SelectedIndex;
+            var row = Staff_Patient_DataGrid.Items[vs] as DataRowView;
+            var selected_patient_id = row?["id"].ToString();
+
+
+            
+            Patient_MenuItem_Refresh_Click(sender, e);
+
+            var patients = Patient_DataGrid.Items.Cast<DataRowView>();
+            var sel = patients.Where(x => x?["id"].ToString() == selected_patient_id);
+            
+            if (!sel.Any())
+            {
+                return;
+            }
+            var row_view = sel.First();
+            this.Grid_Patient.Visibility = Visibility.Visible;
+            this.Grid_Staff.Visibility = Visibility.Collapsed;
+
+            var index = Patient_DataGrid.Items.IndexOf(row_view);
+
+            Patient_DataGrid.SelectedIndex = index;
+        }
+
+        #endregion
+
+
     }
 }

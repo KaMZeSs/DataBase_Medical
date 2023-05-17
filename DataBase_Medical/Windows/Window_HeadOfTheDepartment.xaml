@@ -32,7 +32,7 @@
         </Grid> <!--Меню-->
         
 
-        <Grid x:Name="Grid_Patient" Grid.Row="1" Visibility="Visible">
+        <Grid x:Name="Grid_Patient" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -285,8 +285,170 @@
             <!--Инфа о пациенте-->
 
         </Grid> <!--Больные-->
-        
-        <Grid x:Name="Grid_Staff" Grid.Row="1" Visibility="Collapsed">
+
+        <Grid x:Name="Grid_Staff" Grid.Row="1" Visibility="Visible">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" MaxWidth="350"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="0" Style="{StaticResource InfoTitle_Style}" FontSize="20">
+                    Список сотрудников
+                </Label>
+
+                <Menu Grid.Row="1" Style="{StaticResource Menu_Style}">
+                    <MenuItem Click="Staff_MenuItem_Refresh_Click">
+                        <MenuItem.Header>
+                            <materialDesign:PackIcon Kind="Refresh" Height="19" Width="19"/>
+                        </MenuItem.Header>
+                    </MenuItem>
+                    <MenuItem Click="Staff_MenuItem_Search_Click">
+                        <MenuItem.Header>
+                            <materialDesign:PackIcon Kind="Search" Height="19" Width="19"/>
+                        </MenuItem.Header>
+                    </MenuItem>
+                </Menu>
+
+                <Grid x:Name="Staff_Grid_Search" Grid.Row="2" Visibility="Collapsed">
+                    <!--Инфа для поиска-->
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!--ФИО для поиска-->
+                    <Label Grid.Row="0" Style="{StaticResource InfoField_Style}" FontSize="12">
+                        ФИО:
+                    </Label>
+                    <RibbonTextBox Name="Staff_TextBox_SearchData" MinWidth="100" HorizontalAlignment="Stretch" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
+
+                    <Label Grid.Row="1" Style="{StaticResource InfoField_Style}" FontSize="12">
+                        Отделение:
+                    </Label>
+                    <ComboBox Name="Staff_ComboBox_SearchData" Grid.Row="1" Grid.Column="1" Style="{StaticResource ComboBox_Style}" />
+
+                    <Button Name="Staff_Button_SearchData" Click="Staff_Button_SearchData_Click" Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
+                </Grid>
+                <!--Поиск-->
+
+                <DataGrid Grid.Row="3" x:Name="Staff_DataGrid" MaxWidth="350"
+                      Style="{StaticResource DataGrid_Style}"
+                      CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
+                      SelectedCellsChanged="Staff_DataGrid_SelectedCellsChanged"
+                      IsReadOnly="True"/>
+
+            </Grid>
+            <!--Список сотрудников-->
+
+            <Grid Grid.Column="1" Margin="20, 0, 20, 0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition ></RowDefinition>
+                </Grid.RowDefinitions>
+
+                <Grid Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="60" />
+                        <RowDefinition Height="50" />
+                        <RowDefinition Height="50" />
+                        <RowDefinition Height="50" />
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition Width="Auto"></ColumnDefinition>
+                        <ColumnDefinition></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Row="0" Grid.ColumnSpan="4" Style="{StaticResource InfoTitle_Style}">
+                        Информация о сотруднике
+                    </Label>
+
+                    <!--Фамилия-->
+                    <Label Grid.Row="1" Style="{StaticResource InfoField_Style}">
+                        Фамилия:
+                    </Label>
+                    <Label Name="Staff_Label_Surname" MinWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+
+                    <!--Имя-->
+                    <Label Grid.Row="2" Style="{StaticResource InfoField_Style}">
+                        Имя:
+                    </Label>
+                    <Label Name="Staff_Label_Name" MinWidth="150" Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+
+                    <!--Отчество-->
+                    <Label Grid.Row="3" Style="{StaticResource InfoField_Style}">
+                        Отчество:
+                    </Label>
+                    <Label Name="Staff_Label_Patronymic" MinWidth="150" Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+
+                    <!--Отделение-->
+                    <Label Grid.Row="1" Grid.Column="2" Margin="20, 0, 0, 0" Style="{StaticResource InfoField_Style}">
+                        Отделение:
+                    </Label>
+                    <Label Name="Staff_Label_Department" MinWidth="150" Grid.Row="1" Grid.Column="3" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+
+                    <!--Категория-->
+                    <Label Grid.Row="2" Grid.Column="2" Margin="20, 0, 0, 0" Style="{StaticResource InfoField_Style}">
+                        Категория:
+                    </Label>
+                    <Label Name="Staff_Label_Category" MinWidth="150" Grid.Row="2" Grid.Column="3" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+
+                    <!--Должность-->
+                    <Label Grid.Row="3" Grid.Column="2" Margin="20, 0, 0, 0" Style="{StaticResource InfoField_Style}" Visibility="Visible">
+                        Должность:
+                    </Label>
+                    <Label Name="Staff_Label_JobTitle" MinWidth="150" Grid.Row="3" Grid.Column="3" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
+
+                </Grid>
+
+                <Grid Grid.Row="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition ></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    
+                    <Label Grid.Row="0" Grid.Column="0" Style="{StaticResource InfoTitle_Style}" FontSize="25">
+                        Список больных врача
+                    </Label>
+
+                    <DataGrid Grid.Row="1" Grid.Column="0" x:Name="Staff_Patient_DataGrid"
+                      Style="{StaticResource DataGrid_Style}"
+                      CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
+                      IsReadOnly="True"
+                      MouseDoubleClick="Staff_Patient_DataGrid_MouseDoubleClick" />
+
+
+                </Grid>
+
+            </Grid>
+            <!--Инфа о сотруднике-->
+
+        </Grid>
+        <!--Персонал-->
+
+        <!--<Grid x:Name="Grid_Staff" Grid.Row="1" Visibility="Visible">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
@@ -319,7 +481,7 @@
                 </Menu>
 
                 <Grid Grid.Row="2" Visibility="Collapsed">
-                    <!--Инфа для поиска-->
+                    --><!--Инфа для поиска--><!--
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
                         <ColumnDefinition Width="Auto" />
@@ -331,7 +493,7 @@
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
 
-                    <!--ФИО для поиска-->
+                    --><!--ФИО для поиска--><!--
                     <Label Grid.Row="0" Style="{StaticResource InfoField_Style}" FontSize="12">
                         ФИО:
                     </Label>
@@ -349,7 +511,7 @@
 
                     <Button Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
                 </Grid>
-                <!--Поиск-->
+                --><!--Поиск--><!--
 
                 <DataGrid Grid.Row="3"
                   Style="{StaticResource DataGrid_Style}"
@@ -369,7 +531,7 @@
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
-            <!--Список сотрудников-->
+            --><!--Список сотрудников--><!--
 
             <Grid Grid.Column="1" Margin="20, 0, 20, 0">
                 <Grid.RowDefinitions>
@@ -399,7 +561,7 @@
                         Информация о сотруднике
                     </Label>
 
-                    <!--Фамилия-->
+                    --><!--Фамилия--><!--
                     <Label Grid.Row="1" Style="{StaticResource InfoField_Style}">
                         Фамилия:
                     </Label>
@@ -407,7 +569,7 @@
                         Иванов
                     </Label>
 
-                    <!--Имя-->
+                    --><!--Имя--><!--
                     <Label Grid.Row="2" Style="{StaticResource InfoField_Style}">
                         Имя:
                     </Label>
@@ -415,7 +577,7 @@
                         Иван
                     </Label>
 
-                    <!--Отчество-->
+                    --><!--Отчество--><!--
                     <Label Grid.Row="3" Style="{StaticResource InfoField_Style}">
                         Отчество:
                     </Label>
@@ -423,7 +585,7 @@
                         Иванович
                     </Label>
 
-                    <!--Отделение-->
+                    --><!--Отделение--><!--
                     <Label Grid.Row="2" Grid.Column="2" Margin="20, 0, 0, 0" Style="{StaticResource InfoField_Style}">
                         Отделение:
                     </Label>
@@ -431,7 +593,7 @@
                         Травмотология
                     </Label>
 
-                    <!--Категория-->
+                    --><!--Категория--><!--
                     <Label Grid.Row="1" Grid.Column="2" Margin="20, 0, 0, 0" Style="{StaticResource InfoField_Style}">
                         Категория:
                     </Label>
@@ -439,7 +601,7 @@
                         Высшая
                     </Label>
 
-                    <!--Должность-->
+                    --><!--Должность--><!--
                     <Label Grid.Row="3" Grid.Column="2" Margin="20, 0, 0, 0" Style="{StaticResource InfoField_Style}" Visibility="Visible">
                         Должность:
                     </Label>
@@ -463,10 +625,10 @@
 
                 </Grid>
 
-            </Grid> <!--Инфа о сотруднике-->
+            </Grid> --><!--Инфа о сотруднике--><!--
             
 
-        </Grid> <!--Персонал-->
+        </Grid> --><!--Персонал-->
         
         <Grid x:Name="Grid_Department" Grid.Row="1" Visibility="Collapsed">
 

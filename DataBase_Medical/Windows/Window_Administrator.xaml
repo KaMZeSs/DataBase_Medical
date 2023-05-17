@@ -182,7 +182,7 @@
             
         </Grid> <!--Больные-->
 
-        <Grid x:Name="Grid_Staff" Grid.Row="1" Visibility="Collapsed">
+        <Grid x:Name="Grid_Staff" Grid.Row="1" Visibility="Visible">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" MaxWidth="350"/>
@@ -645,7 +645,7 @@
 
         </Grid> <!--Заболевания-->
 
-        <Grid x:Name="Grid_Procedure" Grid.Row="1" Visibility="Visible">
+        <Grid x:Name="Grid_Procedure" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" MaxWidth="250"/>
