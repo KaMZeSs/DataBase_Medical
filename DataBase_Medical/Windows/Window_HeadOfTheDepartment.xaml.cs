@@ -91,9 +91,9 @@ namespace DataBase_Medical.Windows
                 case "Отделения":
                 {
                     this.Grid_Department.Visibility = Visibility.Visible;
-                    //Department_MenuItem_Refresh_Click(sender, e);
-                    //await ConnectionCarrier.Carrier.WaitForConnectionAsync();
-                    //RaiseFirstSelection(Department_DataGrid);
+                    Department_MenuItem_Refresh_Click(sender, e);
+                    await ConnectionCarrier.Carrier.WaitForConnectionAsync();
+                    RaiseFirstSelection(Department_DataGrid);
                     break;
                 }
             }
@@ -992,6 +992,193 @@ namespace DataBase_Medical.Windows
 
         #endregion
 
+        #region Department
 
+        string? Department_Selected_Id = string.Empty;
+
+        private async void Department_Load_Data(String id)
+        {
+            Dictionary<String, String> data;
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"Select * From \"Department\" Where \"Department_Exists\" = true AND \"Department_Id\" = {id}";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                data = this.NpgsqlDataReader_To_Dictionary(reader, new Dictionary<string, string>()
+                {
+                    { "id", "Department_Id" },
+                    { "Название отделения", "Department_Name" },
+                    { "Телефон отделения", "Department_Phone" },
+                    { "Койки отделения", "Department_Beds" }
+                });
+
+                Department_Label_Name.Content = data["Название отделения"];
+                Department_Label_Phone.Content = data["Телефон отделения"];
+                Department_Label_Beds.Content = data["Койки отделения"];
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+            Department_Load_Patiens();
+        }
+
+        private async void Department_MenuItem_Refresh_Click(object sender, RoutedEventArgs e)
+        {
+            Department_Label_Name.Content = "";
+
+            Department_Label_Phone.Content = "";
+
+            Department_Label_Beds.Content = "";
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = "Select * From \"Department\" Where \"Department_Exists\" = true Order By \"Department_Id\"";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "id", "Department_Id" },
+                    { "Название отделения", "Department_Name" }
+                });
+
+                this.Department_DataGrid.ItemsSource = new DataView(dt);
+                this.Department_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+            if (Department_Selected_Id != string.Empty)
+            {
+                Department_Load_Data(Department_Selected_Id);
+            }
+            else
+            {
+                RaiseFirstSelection(Department_DataGrid);
+            }
+        }
+
+        private void Department_MenuItem_Search_Click(object sender, RoutedEventArgs e)
+        {
+            this.Department_Grid_Search.Visibility =
+               this.Department_Grid_Search.Visibility is Visibility.Visible ?
+               Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void Department_DataGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            if (Department_DataGrid.SelectedIndex is -1)
+                return;
+
+            var vs = Department_DataGrid.SelectedIndex;
+            var row = Department_DataGrid.Items[vs] as DataRowView;
+            Department_Selected_Id = row?["id"].ToString();
+
+            Department_Load_Data(Department_Selected_Id);
+        }
+
+        private async void Department_Button_SearchData_Click(object sender, RoutedEventArgs e)
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"Select * From \"Department\" Where lower(\"Department_Name\") Like '%{Department_TextBox_SearchData.Text.ToLower()}%' Order By \"Department_Id\"";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "id", "Department_Id" },
+                    { "Название отделения", "Department_Name" }
+                });
+
+                this.Department_DataGrid.ItemsSource = new DataView(dt);
+                this.Department_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+            }
+            catch
+            {
+
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+        }
+
+        private async void Department_Load_Patiens()
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"Select * From \"Patient_SurnameNP_Department_Id\" Where \"Department_Id\" = {Department_Selected_Id}";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "id", "Patient_Id" },
+                    { "ФИО", "Patient_SurnameNP" }
+                });
+
+                this.Department_Patient_DataGrid.ItemsSource = new DataView(dt);
+                this.Department_Patient_DataGrid.Columns.Where(x => x.Header == "id").First().Visibility = Visibility.Collapsed;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+
+        }
+
+        private void Department_Patient_DataGrid_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (Department_Patient_DataGrid.SelectedIndex is -1)
+                return;
+
+            var vs = Department_Patient_DataGrid.SelectedIndex;
+            var row = Department_Patient_DataGrid.Items[vs] as DataRowView;
+            var selected_patient_id = row?["id"].ToString();
+
+
+
+            Patient_MenuItem_Refresh_Click(sender, e);
+
+            var patients = Patient_DataGrid.Items.Cast<DataRowView>();
+            var sel = patients.Where(x => x?["id"].ToString() == selected_patient_id);
+
+            if (!sel.Any())
+            {
+                return;
+            }
+            var row_view = sel.First();
+            this.Grid_Patient.Visibility = Visibility.Visible;
+            this.Grid_Department.Visibility = Visibility.Collapsed;
+
+            var index = Patient_DataGrid.Items.IndexOf(row_view);
+
+            Patient_DataGrid.SelectedIndex = index;
+        }
+
+        #endregion
     }
 }

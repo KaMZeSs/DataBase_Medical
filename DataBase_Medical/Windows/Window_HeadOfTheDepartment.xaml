@@ -286,7 +286,7 @@
 
         </Grid> <!--Больные-->
 
-        <Grid x:Name="Grid_Staff" Grid.Row="1" Visibility="Visible">
+        <Grid x:Name="Grid_Staff" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" MaxWidth="350"/>
@@ -448,192 +448,10 @@
         </Grid>
         <!--Персонал-->
 
-        <!--<Grid x:Name="Grid_Staff" Grid.Row="1" Visibility="Visible">
-
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
-
-            <Grid Grid.Column="0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition></RowDefinition>
-                </Grid.RowDefinitions>
-
-                <Label Grid.Row="0" Style="{StaticResource InfoTitle_Style}" FontSize="20">
-                    Список сотрудников
-                </Label>
-
-                <Menu Grid.Row="1" Style="{StaticResource Menu_Style}">
-                    <MenuItem>
-                        <MenuItem.Header>
-                            <materialDesign:PackIcon Kind="Refresh" Height="19" Width="19"/>
-                        </MenuItem.Header>
-                    </MenuItem>
-                    <MenuItem>
-                        <MenuItem.Header>
-                            <materialDesign:PackIcon Kind="Search" Height="19" Width="19"/>
-                        </MenuItem.Header>
-                    </MenuItem>
-                </Menu>
-
-                <Grid Grid.Row="2" Visibility="Collapsed">
-                    --><!--Инфа для поиска--><!--
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-
-                    --><!--ФИО для поиска--><!--
-                    <Label Grid.Row="0" Style="{StaticResource InfoField_Style}" FontSize="12">
-                        ФИО:
-                    </Label>
-                    <RibbonTextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
-
-                    <Label Grid.Row="1" Style="{StaticResource InfoField_Style}" FontSize="12">
-                        Отделение:
-                    </Label>
-                    <ComboBox Grid.Row="1" Grid.Column="1" Style="{StaticResource ComboBox_Style}">
-                        <ComboBox.Items>
-                            <ComboBoxItem>Травматология</ComboBoxItem>
-                            <ComboBoxItem>Геникология</ComboBoxItem>
-                        </ComboBox.Items>
-                    </ComboBox>
-
-                    <Button Grid.Row="2" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
-                </Grid>
-                --><!--Поиск--><!--
-
-                <DataGrid Grid.Row="3"
-                  Style="{StaticResource DataGrid_Style}"
-                  CanUserAddRows="False" CanUserDeleteRows="False"
-                  IsReadOnly="True">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn>
-                            <DataGridTextColumn.Header>
-                                ФИО
-                            </DataGridTextColumn.Header>
-                        </DataGridTextColumn>
-                        <DataGridTextColumn>
-                            <DataGridTextColumn.Header>
-                                Отделение
-                            </DataGridTextColumn.Header>
-                        </DataGridTextColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-            </Grid>
-            --><!--Список сотрудников--><!--
-
-            <Grid Grid.Column="1" Margin="20, 0, 20, 0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"></RowDefinition>
-                    <RowDefinition ></RowDefinition>
-                </Grid.RowDefinitions>
-
-                <Grid Grid.Row="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="60" />
-                        <RowDefinition Height="50" />
-                        <RowDefinition Height="50" />
-                        <RowDefinition Height="50" />
-                        <RowDefinition Height="50" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition Width="Auto"></ColumnDefinition>
-                        <ColumnDefinition></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
-
-                    <Label Grid.Row="0" Grid.ColumnSpan="4" Style="{StaticResource InfoTitle_Style}">
-                        Информация о сотруднике
-                    </Label>
-
-                    --><!--Фамилия--><!--
-                    <Label Grid.Row="1" Style="{StaticResource InfoField_Style}">
-                        Фамилия:
-                    </Label>
-                    <Label Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Иванов
-                    </Label>
-
-                    --><!--Имя--><!--
-                    <Label Grid.Row="2" Style="{StaticResource InfoField_Style}">
-                        Имя:
-                    </Label>
-                    <Label Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Иван
-                    </Label>
-
-                    --><!--Отчество--><!--
-                    <Label Grid.Row="3" Style="{StaticResource InfoField_Style}">
-                        Отчество:
-                    </Label>
-                    <Label Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Иванович
-                    </Label>
-
-                    --><!--Отделение--><!--
-                    <Label Grid.Row="2" Grid.Column="2" Margin="20, 0, 0, 0" Style="{StaticResource InfoField_Style}">
-                        Отделение:
-                    </Label>
-                    <Label Grid.Row="2" Grid.Column="3" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Травмотология
-                    </Label>
-
-                    --><!--Категория--><!--
-                    <Label Grid.Row="1" Grid.Column="2" Margin="20, 0, 0, 0" Style="{StaticResource InfoField_Style}">
-                        Категория:
-                    </Label>
-                    <Label Grid.Row="1" Grid.Column="3" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Высшая
-                    </Label>
-
-                    --><!--Должность--><!--
-                    <Label Grid.Row="3" Grid.Column="2" Margin="20, 0, 0, 0" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Должность:
-                    </Label>
-                    <Label Grid.Row="3" Grid.Column="3" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Врач
-                    </Label>
-
-                    <Label Grid.Row="5" Grid.ColumnSpan="4" Style="{StaticResource InfoTitle_Style}" FontSize="25">
-                        Список больных врача
-                    </Label>
-
-                    <DataGrid Grid.Row="6" Grid.ColumnSpan="4" Height="200"
-                          Style="{StaticResource DataGrid_Style}"
-                          CanUserAddRows="False" CanUserDeleteRows="False"
-                          IsReadOnly="True">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Width="200" Header="ФИО" />
-                            <DataGridTextColumn Header="Отделение"/>
-                        </DataGrid.Columns>
-                    </DataGrid>
-
-                </Grid>
-
-            </Grid> --><!--Инфа о сотруднике--><!--
-            
-
-        </Grid> --><!--Персонал-->
-        
         <Grid x:Name="Grid_Department" Grid.Row="1" Visibility="Collapsed">
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="Auto" MaxWidth="300"/>
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
@@ -650,19 +468,19 @@
                 </Label>
 
                 <Menu Grid.Row="1" Style="{StaticResource Menu_Style}">
-                    <MenuItem>
+                    <MenuItem Click="Department_MenuItem_Refresh_Click">
                         <MenuItem.Header>
                             <materialDesign:PackIcon Kind="Refresh" Height="19" Width="19"/>
                         </MenuItem.Header>
                     </MenuItem>
-                    <MenuItem>
+                    <MenuItem Click="Department_MenuItem_Search_Click">
                         <MenuItem.Header>
                             <materialDesign:PackIcon Kind="Search" Height="19" Width="19"/>
                         </MenuItem.Header>
                     </MenuItem>
                 </Menu>
 
-                <Grid Grid.Row="2" Visibility="Collapsed">
+                <Grid x:Name="Department_Grid_Search" Grid.Row="2" Visibility="Collapsed">
                     <!--Инфа для поиска-->
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto" />
@@ -678,24 +496,16 @@
                     <Label Grid.Row="0" Style="{StaticResource InfoField_Style}" FontSize="12">
                         Название:
                     </Label>
-                    <RibbonTextBox Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
-
-                    <Button Grid.Row="1" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
+                    <RibbonTextBox Name="Department_TextBox_SearchData" MinWidth="150" Grid.Row="0" Grid.Column="1" Style="{StaticResource TextBox_Style}" FontSize="12" />
+                    <Button Name="Department_Button_SearchData" Click="Department_Button_SearchData_Click" Grid.Row="1" Grid.ColumnSpan="2"  Content="Поиск" Style="{StaticResource Button_Style}" />
                 </Grid>
                 <!--Поиск-->
 
-                <DataGrid Grid.Row="3"
-                  Style="{StaticResource DataGrid_Style}"
-                  CanUserAddRows="False" CanUserDeleteRows="False"
-                  IsReadOnly="True">
-                    <DataGrid.Columns>
-                        <DataGridTextColumn>
-                            <DataGridTextColumn.Header>
-                                Название отделения
-                            </DataGridTextColumn.Header>
-                        </DataGridTextColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
+                <DataGrid Grid.Row="3" x:Name="Department_DataGrid" MaxWidth="300"
+                      Style="{StaticResource DataGrid_Style}"
+                      CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
+                      SelectedCellsChanged="Department_DataGrid_SelectedCellsChanged"
+                      IsReadOnly="True"/>
 
             </Grid>
             <!--Список отделений-->
@@ -703,6 +513,7 @@
             <Grid Grid.Column="1" Margin="20, 0, 20, 0">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto"></RowDefinition>
+                    <RowDefinition ></RowDefinition>
                     <RowDefinition ></RowDefinition>
                 </Grid.RowDefinitions>
 
@@ -712,7 +523,6 @@
                         <RowDefinition Height="50" />
                         <RowDefinition Height="50" />
                         <RowDefinition Height="50" />
-                        <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -728,34 +538,49 @@
                     <Label Grid.Row="1" Style="{StaticResource InfoField_Style}">
                         Название:
                     </Label>
-                    <Label Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        Травматология
-                    </Label>
-                    <RibbonTextBox Grid.Row="1" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="Травматология" />
+                    <Label Name="Department_Label_Name" MinWidth="150" Grid.Row="1" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
 
                     <!--Телефон-->
                     <Label Grid.Row="2" Style="{StaticResource InfoField_Style}">
                         Телефон:
                     </Label>
-                    <Label Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        +7(949)-359-45-65
-                    </Label>
-                    <RibbonTextBox Grid.Row="2" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="+7(949)-359-45-65 " />
+                    <Label Name="Department_Label_Phone" MinWidth="150" Grid.Row="2" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
 
                     <!--Число коек-->
                     <Label Grid.Row="3" Style="{StaticResource InfoField_Style}">
                         Число коек:
                     </Label>
-                    <Label Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible">
-                        35
-                    </Label>
-                    <RibbonTextBox Grid.Row="3" Grid.Column="1" Style="{StaticResource TextBox_Style}" Visibility="Collapsed" Text="35" />
+                    <Label Name="Department_Label_Beds" MinWidth="150" Grid.Row="3" Grid.Column="1" Style="{StaticResource InfoField_Style}" Visibility="Visible" />
 
                 </Grid>
+                
+                <Grid Grid.Row="2">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"></RowDefinition>
+                        <RowDefinition ></RowDefinition>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
 
-            </Grid> <!--Инфа об отделении-->
-            
-        </Grid> <!--Отделения-->
-       
+                    <Label Grid.Row="0" Grid.Column="0" Style="{StaticResource InfoTitle_Style}" FontSize="25">
+                        Список больных в отделении
+                    </Label>
+
+                    <DataGrid Grid.Row="1" Grid.Column="0" x:Name="Department_Patient_DataGrid"
+                      Style="{StaticResource DataGrid_Style}"
+                      CanUserAddRows="False" CanUserDeleteRows="False" SelectionMode="Single"
+                      IsReadOnly="True"
+                      MouseDoubleClick="Department_Patient_DataGrid_MouseDoubleClick" />
+
+
+                </Grid>
+            </Grid>
+            <!--Инфа об отделении-->
+
+        </Grid>
+        <!--Отделения-->
+
     </Grid>
 </Window>
