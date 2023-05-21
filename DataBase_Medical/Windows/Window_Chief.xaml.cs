@@ -948,5 +948,20 @@ namespace DataBase_Medical.Windows
         }
 
         #endregion
+
+        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+        }
+
+        private void Statistic_View_Statistic_Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Statistic_Export_Statistic_Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

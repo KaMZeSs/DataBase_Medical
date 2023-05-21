@@ -603,7 +603,7 @@ namespace Generator
             Console.WriteLine($"{DateTime.Now}: Генерация болезней пациентов");
             db.PatientDiseases_list = PatientDiseases.GeneratePatientDiseases(15, db.Patients, db.Diseases);
             Console.WriteLine($"{DateTime.Now}: Генерация нахождений пациентов");
-            db.HospitalStays = HospitalStay.GenerateHospitalStays(15, db.Patients, db.Departments, db.Staff_list);
+            db.HospitalStays = HospitalStay.GenerateHospitalStays(8, db.Patients, db.Departments, db.Staff_list);
             Console.WriteLine($"{DateTime.Now}: Генерация назначений врачей");
             db.DoctorAppointments = DoctorAppointment.GenerateDoctorAppointments(20, db.Patients, db.Staff_list, db.Procedures, db.JobTitles);
             Console.WriteLine($"{DateTime.Now}: Генерация данных завершена");

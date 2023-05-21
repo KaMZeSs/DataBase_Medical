@@ -725,6 +725,11 @@ namespace DataBase_Medical.Windows
                     MessageBox.Show("Пациент уже госпитализирован в другом отделении", "Ошибка", 
                         MessageBoxButton.OK, MessageBoxImage.Error);
                 }
+                else if (ex.Message.Contains("available"))
+                {
+                    MessageBox.Show("В отделении нет свободных коек", "Ошибка",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
 
                 return;
             }

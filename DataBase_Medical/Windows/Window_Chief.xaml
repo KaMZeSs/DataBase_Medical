@@ -30,6 +30,7 @@
                 <MenuItem Header="Больные" Visibility="Visible" Click="MenuItem_Click"/>
                 <MenuItem Header="Персонал" Visibility="Visible" Click="MenuItem_Click"/>
                 <MenuItem Header="Отделения" Visibility="Visible" Click="MenuItem_Click"/>
+                <MenuItem Header="Статистика" Visibility="Visible" Click="MenuItem_Click"/>
             </Menu>
         </Grid>
         <!--Меню-->
@@ -255,9 +256,9 @@
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
 
-                        <Button Grid.Column="1" Click="Patient_Button_DiseaseHistory_Click" Content="История болезней" 
+                        <Button Grid.Column="0" Click="Patient_Button_DiseaseHistory_Click" Content="История болезней" 
                         Style="{StaticResource Button_Style}" />
-                        <Button Grid.Column="2" Click="Patient_Button_AppointmentHistory_Click" Content="История назначений" 
+                        <Button Grid.Column="1" Click="Patient_Button_AppointmentHistory_Click" Content="История назначений" 
                         Style="{StaticResource Button_Style}" />
                     </Grid>
 
@@ -564,6 +565,53 @@
 
         </Grid>
         <!--Отделения-->
+
+        <Grid x:Name="Grid_Statistic" Grid.Row="1" Visibility="Collapsed">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <ListView Grid.Column="0" SelectionChanged="ListView_SelectionChanged">
+                Суммарная зарплата по отделениям
+                Запрос №2
+            </ListView>
+
+            <DataGrid x:Name="Statistic_DataGrid" Width="Auto" Grid.Column="1"
+                                  AutoGenerateColumns="True" Grid.Row="0"
+                                  Style="{StaticResource DataGrid_Style}"  
+                                  CanUserAddRows="False" CanUserDeleteRows="False"
+                                  SelectionMode="Single"
+                                  IsReadOnly="True"/>
+
+            <Grid Grid.Row="2" Height="Auto" Grid.ColumnSpan="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Button Name="Statistic_View_Statistic_Button" Click="Statistic_View_Statistic_Button_Click" Grid.Column="2"  Content="График" Style="{StaticResource Button_Style}" />
+                <Button Name="Statistic_Export_Statistic_Button" Click="Statistic_Export_Statistic_Button_Click" Grid.Column="3"  Content="Экспорт" Style="{StaticResource Button_Style}" />
+
+                <Grid Grid.Column="0" Name="get_departments_with_total_salary_Grid">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    
+                </Grid>
+            </Grid>
+
+        </Grid>
 
     </Grid>
 </Window>
