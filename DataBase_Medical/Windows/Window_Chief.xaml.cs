@@ -1056,6 +1056,7 @@ namespace DataBase_Medical.Windows
             }
         }
 
+        // TODO
         private void Statistic_View_Statistic_Button_Click(object sender, RoutedEventArgs e)
         {
 
@@ -1166,6 +1167,7 @@ namespace DataBase_Medical.Windows
             }
 
             (sender as Button).Content = "Обновить";
+            Statistic_View_Statistic_Button.IsEnabled = Statistic_DataGrid.Columns.Count is 2 & Statistic_DataGrid.HasItems;
         }
 
         #endregion
@@ -1198,6 +1200,7 @@ namespace DataBase_Medical.Windows
             {
                 await conn.CloseAsync();
             }
+            Statistic_View_Statistic_Button.IsEnabled = Statistic_DataGrid.Columns.Count is 2 & Statistic_DataGrid.HasItems;
         }
 
         #endregion
@@ -1238,6 +1241,7 @@ namespace DataBase_Medical.Windows
             }
 
             (sender as Button).Content = "Обновить";
+            Statistic_View_Statistic_Button.IsEnabled = Statistic_DataGrid.Columns.Count is 2 & Statistic_DataGrid.HasItems;
         }
 
         #endregion
@@ -1272,6 +1276,7 @@ namespace DataBase_Medical.Windows
             }
 
             (sender as Button).Content = "Обновить";
+            Statistic_View_Statistic_Button.IsEnabled = Statistic_DataGrid.Columns.Count is 2 & Statistic_DataGrid.HasItems;
         }
 
         #endregion
@@ -1306,6 +1311,7 @@ namespace DataBase_Medical.Windows
             }
 
             (sender as Button).Content = "Обновить";
+            Statistic_View_Statistic_Button.IsEnabled = Statistic_DataGrid.Columns.Count is 2 & Statistic_DataGrid.HasItems;
         }
 
         #endregion
@@ -1341,6 +1347,7 @@ namespace DataBase_Medical.Windows
             }
 
             (sender as Button).Content = "Обновить";
+            Statistic_View_Statistic_Button.IsEnabled = Statistic_DataGrid.Columns.Count is 2 & Statistic_DataGrid.HasItems;
         }
 
         #endregion
@@ -1373,6 +1380,8 @@ namespace DataBase_Medical.Windows
             {
                 await conn.CloseAsync();
             }
+
+            Statistic_View_Statistic_Button.IsEnabled = Statistic_DataGrid.Columns.Count is 2 & Statistic_DataGrid.HasItems;
         }
 
         #endregion
@@ -1405,6 +1414,8 @@ namespace DataBase_Medical.Windows
             {
                 await conn.CloseAsync();
             }
+
+            Statistic_View_Statistic_Button.IsEnabled = Statistic_DataGrid.Columns.Count is 2 & Statistic_DataGrid.HasItems;
         }
 
         #endregion
@@ -1436,8 +1447,11 @@ namespace DataBase_Medical.Windows
             {
                 await conn.CloseAsync();
             }
+
+            Statistic_View_Statistic_Button.IsEnabled = Statistic_DataGrid.Columns.Count is 2 & Statistic_DataGrid.HasItems;
         }
 
         #endregion
+
     }
 }
