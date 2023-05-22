@@ -566,9 +566,9 @@
         </Grid>
         <!--Отделения-->
 
-        <Grid x:Name="Grid_Statistic" Grid.Row="1" Visibility="Collapsed">
+        <Grid x:Name="Grid_Statistic" Grid.Row="1" Visibility="Visible">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
+                <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
@@ -578,17 +578,43 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <ListView Grid.Column="0" SelectionChanged="ListView_SelectionChanged">
-                Суммарная зарплата по отделениям
-                Запрос №2
+            <ListView Grid.Column="0" SelectionChanged="ListView_SelectionChanged" SelectionMode="Single">
+                <ListViewItem>
+                    Список сотрудников принятых с
+                </ListViewItem>
+                <ListViewItem>
+                    Самое частое заболеванние
+                </ListViewItem>
+                <ListViewItem>
+                    Список отделений с количеством дорогих госпитализаций
+                </ListViewItem>
+                <ListViewItem>
+                    Список докторов с пациентами по фамилии
+                </ListViewItem>
+                <ListViewItem>
+                    Получить отделения с общей зарплатой
+                </ListViewItem>
+                <ListViewItem>
+                    Количество работников принятых в отделение после определенной даты
+                </ListViewItem>
+                <ListViewItem>
+                    Количество назначений по докторам
+                </ListViewItem>
+                <ListViewItem>
+                    Количество должностей в больнице
+                </ListViewItem>
+                <ListViewItem>
+                    Список болезней, не выявленных в текущем месяце
+                </ListViewItem>
             </ListView>
 
-            <DataGrid x:Name="Statistic_DataGrid" Width="Auto" Grid.Column="1"
-                                  AutoGenerateColumns="True" Grid.Row="0"
+            <DataGrid x:Name="Statistic_DataGrid" Width="Auto"
+                                  AutoGenerateColumns="True"
                                   Style="{StaticResource DataGrid_Style}"  
                                   CanUserAddRows="False" CanUserDeleteRows="False"
                                   SelectionMode="Single"
-                                  IsReadOnly="True"/>
+                                  IsReadOnly="True"
+                      Grid.Column="1" Grid.Row="0" Grid.RowSpan="2"/>
 
             <Grid Grid.Row="2" Height="Auto" Grid.ColumnSpan="2">
                 <Grid.ColumnDefinitions>
@@ -601,13 +627,76 @@
                 <Button Name="Statistic_View_Statistic_Button" Click="Statistic_View_Statistic_Button_Click" Grid.Column="2"  Content="График" Style="{StaticResource Button_Style}" />
                 <Button Name="Statistic_Export_Statistic_Button" Click="Statistic_Export_Statistic_Button_Click" Grid.Column="3"  Content="Экспорт" Style="{StaticResource Button_Style}" />
 
-                <Grid Grid.Column="0" Name="get_departments_with_total_salary_Grid">
+                <Grid Grid.Column="0" Margin="10,0,10,0" Name="chiefdata_filter_staff_date_Grid" Visibility="Collapsed">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                         <ColumnDefinition/>
                     </Grid.ColumnDefinitions>
                     
+                    <Label Grid.Column="0" Style="{StaticResource InfoField_Style}" FontSize="14" Content="Принят с: " />
+                    <DatePicker Grid.Column="1" FontSize="14" Width="200" Margin="10,0,0,0" x:Name="chiefdata_filter_staff_date_DatePicker" />
+                    <Button Click="chiefdata_filter_staff_date_Button_Click" Grid.Column="2" Content="Подтвердить" Style="{StaticResource Button_Style}" />
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,0,10,0" Name="All_MostPopular_Diesease_Grid" Visibility="Collapsed">
+                    <Button Click="All_MostPopular_Diesease_Button_Click" Grid.Column="2" Content="Обновить" Style="{StaticResource Button_Style}" />
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,0,10,0" Name="expensive_hospital_stays_Grid" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Style="{StaticResource InfoField_Style}" FontSize="14" Content="Стоимость от: " />
+                    <RibbonTextBox Name="expensive_hospital_stays_TextBox" FontSize="14" Width="100" MaxWidth="100" Grid.Column="1" Style="{StaticResource TextBox_Style}" />
+                    <Button Click="expensive_hospital_stays_Button_Click" Grid.Column="2" Content="Подтвердить" Style="{StaticResource Button_Style}" />
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,0,10,0" Name="get_doctors_with_patientscount_byname_Grid" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Style="{StaticResource InfoField_Style}" FontSize="14" Content="Фамилия пациента: " />
+                    <RibbonTextBox Name="get_doctors_with_patientscount_byname_TextBox" FontSize="14" Width="100" MaxWidth="100" Grid.Column="1" Style="{StaticResource TextBox_Style}" />
+                    <Button Click="get_doctors_with_patientscount_byname_Button_Click" Grid.Column="2" Content="Подтвердить" Style="{StaticResource Button_Style}" />
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,0,10,0" Name="get_departments_with_total_salary_Grid" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Style="{StaticResource InfoField_Style}" FontSize="14" Content="Общая зарплата в отделении от: " />
+                    <RibbonTextBox Name="get_departments_with_total_salary_TextBox" Grid.Column="1" Width="100" MaxWidth="100" Style="{StaticResource TextBox_Style}" FontSize="14" />
+                    <Button Click="get_departments_with_total_salary_Button_Click" Grid.Column="2" Content="Подтвердить" Style="{StaticResource Button_Style}" />
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,0,10,0" Name="get_staff_count_by_dept_and_date_Grid" Visibility="Collapsed">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+
+                    <Label Grid.Column="0" Style="{StaticResource InfoField_Style}" FontSize="14" Content="Отделение: " />
+                    <ComboBox Name="get_staff_count_by_dept_and_date_ComboBox" Width="200" MaxWidth="200" Grid.Column="1" Margin="5, 7, 10, 7" Style="{StaticResource ComboBox_Style}"/>
+                    <Label Grid.Column="2" Style="{StaticResource InfoField_Style}" FontSize="14" Content="Принят на работу после: " />
+                    <DatePicker Grid.Column="3" FontSize="14" Width="200" Margin="10,0,0,0" x:Name="get_staff_count_by_dept_and_date_DatePicker" />
+                    <Button Click="get_staff_count_by_dept_and_date_Button_Click" Grid.Column="4" Content="Подтвердить" Style="{StaticResource Button_Style}" />
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,0,10,0" Name="get_doctor_appointment_count_Grid" Visibility="Collapsed">
+                    <Button Click="get_doctor_appointment_count_Click" Grid.Column="2" Content="Обновить" Style="{StaticResource Button_Style}" />
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,0,10,0" Name="staff_roles_count_Grid" Visibility="Collapsed">
+                    <Button Click="staff_roles_count_Click" Grid.Column="2" Content="Обновить" Style="{StaticResource Button_Style}" />
+                </Grid>
+                <Grid Grid.Column="0" Margin="10,0,10,0" Name="notdiseases_currmonth_Grid" Visibility="Collapsed">
+                    <Button Click="notdiseases_currmonth_Click" Grid.Column="2" Content="Обновить" Style="{StaticResource Button_Style}" />
                 </Grid>
             </Grid>
 

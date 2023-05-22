@@ -22,6 +22,8 @@ namespace DataBase_Medical.Windows
         public Window_Login()
         {
             InitializeComponent();
+            this.Loggin_box.Text = "chief";
+            this.Password_box.Password = "admin";
         }
 
         private async void Button_Click(object sender, RoutedEventArgs e)

@@ -339,6 +339,12 @@ namespace DataBase_Medical.Windows
                 return;
             }
 
+            //if (isReducting & Category_TextBox_Name.Text == Category_Label_Name.Content.ToString())
+            //{
+            //    Category_MenuItem_Refresh_Click(sender, e);
+            //    return;
+            //}
+
             string sql;
             if (!isReducting)
             {
@@ -582,6 +588,12 @@ namespace DataBase_Medical.Windows
                         "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+
+            //if (isReducting & SocialStatus_TextBox_Name.Text == SocialStatus_Label_Name.Content.ToString())
+            //{
+            //    SocialStatus_MenuItem_Refresh_Click(sender, e);
+            //    return;
+            //}
 
             string sql;
             if (!isReducting)
@@ -831,6 +843,12 @@ namespace DataBase_Medical.Windows
                 return;
             }
 
+            //if (isReducting & Procedure_TextBox_Name.Text == Procedure_Label_Name.Content.ToString())
+            //{
+            //    Procedure_MenuItem_Refresh_Click(sender, e);
+            //    return;
+            //}
+
             try
             {
                 Double.Parse(Procedure_TextBox_Cost.Text);
@@ -850,8 +868,11 @@ namespace DataBase_Medical.Windows
             }
             else
             {
-                sql = $"Update \"Procedure\" Set \"Procedure_Name\" = '{Procedure_TextBox_Name.Text}', " +
+                sql = $"Update \"Procedure\" Set " +
+                    (Procedure_TextBox_Name.Text == Procedure_Label_Name.Content.ToString() ? "" : $"\"Procedure_Name\" = '{Procedure_TextBox_Name.Text}', ") +
                     $"\"Procedure_Cost\" = '{Procedure_TextBox_Cost.Text}' Where \"Procedure_Id\" = {Procedure_Selected_Id}";
+                //sql = $"Update \"Procedure\" Set \"Procedure_Name\" = '{Procedure_TextBox_Name.Text}', " +
+                //    $"\"Procedure_Cost\" = '{Procedure_TextBox_Cost.Text}' Where \"Procedure_Id\" = {Procedure_Selected_Id}";
             }
 
             var conn = ConnectionCarrier.Carrier.Connection;
@@ -866,8 +887,16 @@ namespace DataBase_Medical.Windows
             catch (Exception ex)
             {
 
-                MessageBox.Show($"Непредвиденная ошибка{Environment.NewLine}{ex.Message}",
-                    "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                if (ex.Message.Contains("повторяющееся"))
+                {
+                    MessageBox.Show($"Невозможно выполнить операцию{Environment.NewLine}Такое название уже есть",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    MessageBox.Show($"Непредвиденная ошибка{Environment.NewLine}{ex.Message}",
+                        "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
                 return;
             }
             finally
@@ -1061,6 +1090,12 @@ namespace DataBase_Medical.Windows
                 return;
             }
 
+            //if (isReducting & Disease_TextBox_Name.Text == Disease_Label_Name.Content.ToString())
+            //{
+            //    Disease_MenuItem_Refresh_Click(sender, e);
+            //    return;
+            //}
+
             string sql;
             if (!isReducting)
             {
@@ -1072,7 +1107,7 @@ namespace DataBase_Medical.Windows
                 sql = $"Update \"Disease\" Set \"Disease_Name\" = '{Disease_TextBox_Name.Text}' Where \"Disease_Id\" = {Disease_Selected_Id}";
             }
 
-            if (!isReducting | (isReducting & Procedure_Label_Name.Content.ToString() != Procedure_TextBox_Name.Text))
+            if (!isReducting | (isReducting & Disease_Label_Name.Content.ToString() != Disease_TextBox_Name.Text))
             {
                 var conn = ConnectionCarrier.Carrier.Connection;
 

@@ -13,6 +13,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 
+using ClosedXML.Excel;
+
+using Microsoft.Win32;
+
 using Npgsql;
 
 namespace DataBase_Medical.Windows
@@ -29,14 +33,12 @@ namespace DataBase_Medical.Windows
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             this.Title = "Главный врач: " + await ConnectionCarrier.Carrier.GetCurrentFIO();
-            this.Grid_Department.Visibility = this.Grid_Staff.Visibility = this.Grid_Patient.Visibility = Visibility.Collapsed;
-            this.Grid_Patient.Visibility = Visibility.Visible;
-            Patient_MenuItem_Refresh_Click(sender, e);
+            this.Grid_Department.Visibility = this.Grid_Staff.Visibility = this.Grid_Patient.Visibility = this.Grid_Statistic.Visibility = Visibility.Collapsed;
         }
 
         private async void MenuItem_Click(object sender, RoutedEventArgs e)
         {
-            this.Grid_Department.Visibility = this.Grid_Staff.Visibility = this.Grid_Patient.Visibility = Visibility.Collapsed;
+            this.Grid_Department.Visibility = this.Grid_Staff.Visibility = this.Grid_Patient.Visibility = this.Grid_Statistic.Visibility = Visibility.Collapsed;
 
             var obj = sender as MenuItem;
             switch (obj.Header)
@@ -65,6 +67,11 @@ namespace DataBase_Medical.Windows
                     RaiseFirstSelection(Department_DataGrid);
                     break;
                 }
+                case "Статистика":
+                {
+                    this.Grid_Statistic.Visibility = Visibility.Visible;
+                    break;
+                }
             }
         }
 
@@ -86,7 +93,8 @@ namespace DataBase_Medical.Windows
                 "Госпитализация",
                 "Выздоровление",
                 "Дата заболевания",
-                "Заболевание"
+                "Заболевание",
+                "Дата принятия на работу"
             };
 
             DataTable dt = new DataTable();
@@ -949,9 +957,103 @@ namespace DataBase_Medical.Windows
 
         #endregion
 
-        private void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void ListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (e.AddedItems.Count is 0)
+                return;
 
+            this.chiefdata_filter_staff_date_Grid.Visibility =
+                this.All_MostPopular_Diesease_Grid.Visibility =
+                this.expensive_hospital_stays_Grid.Visibility =
+                this.get_doctors_with_patientscount_byname_Grid.Visibility =
+                this.get_departments_with_total_salary_Grid.Visibility =
+                this.get_staff_count_by_dept_and_date_Grid.Visibility =
+                this.get_doctor_appointment_count_Grid.Visibility =
+                this.staff_roles_count_Grid.Visibility =
+                this.notdiseases_currmonth_Grid.Visibility = Visibility.Collapsed;
+
+
+
+            var vs = (e.AddedItems[e.AddedItems.Count - 1] as ListViewItem).Content.ToString();
+
+            switch (vs)
+            {
+                case "Список сотрудников принятых с":
+                {
+                    this.chiefdata_filter_staff_date_Grid.Visibility = Visibility.Visible;
+                    break;
+                }
+                case "Самое частое заболеванние":
+                {
+                    this.All_MostPopular_Diesease_Grid.Visibility = Visibility.Visible;
+                    All_MostPopular_Diesease_Button_Click(sender, e);
+                    break;
+                }
+                case "Список отделений с количеством дорогих госпитализаций":
+                {
+                    this.expensive_hospital_stays_Grid.Visibility = Visibility.Visible;
+                    break;
+                }
+                case "Список докторов с пациентами по фамилии":
+                {
+                    this.get_doctors_with_patientscount_byname_Grid.Visibility = Visibility.Visible;
+                    break;
+                }
+                case "Получить отделения с общей зарплатой":
+                {
+                    this.get_departments_with_total_salary_Grid.Visibility = Visibility.Visible;
+                    break;
+                }
+                case "Количество работников принятых в отделение после определенной даты":
+                {
+                    try
+                    {
+                        await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                        String sql = "Select \"Department_Name\" From \"Department\"";
+                        var reader = await new NpgsqlCommand(sql, ConnectionCarrier.Carrier.Connection).ExecuteReaderAsync();
+                        Departments.Clear();
+                        while (reader.Read())
+                        {
+                            Departments.Add(reader.GetString(0));
+                        }
+                        
+                        get_staff_count_by_dept_and_date_ComboBox.ItemsSource = Departments;
+                        get_staff_count_by_dept_and_date_ComboBox.SelectedIndex = 0;
+
+                        get_staff_count_by_dept_and_date_DatePicker.SelectedDate = DateTime.Now;
+                    }
+                    catch
+                    {
+
+                    }
+                    finally
+                    {
+                        await ConnectionCarrier.Carrier.Connection.CloseAsync();
+                    }
+                    this.get_staff_count_by_dept_and_date_Grid.Visibility = Visibility.Visible;
+                    break;
+                }
+                case "Количество назначений по докторам":
+                {
+                    this.get_doctor_appointment_count_Grid.Visibility = Visibility.Visible;
+                    this.get_doctor_appointment_count_Click(sender, e);
+                    break;
+                }
+                case "Количество должностей в больнице":
+                {
+                    this.staff_roles_count_Grid.Visibility = Visibility.Visible;
+                    this.staff_roles_count_Click(sender, e);
+                    break;
+                }
+                case "Список болезней, не выявленных в текущем месяце":
+                {
+                    this.notdiseases_currmonth_Grid.Visibility = Visibility.Visible;
+                    this.notdiseases_currmonth_Click(sender, e);
+                    break;
+                }
+                default:
+                    return;
+            }
         }
 
         private void Statistic_View_Statistic_Button_Click(object sender, RoutedEventArgs e)
@@ -961,7 +1063,381 @@ namespace DataBase_Medical.Windows
 
         private void Statistic_Export_Statistic_Button_Click(object sender, RoutedEventArgs e)
         {
+            try
+            {
+                // Создание диалогового окна выбора места сохранения файла
+                var saveFileDialog = new SaveFileDialog();
+                saveFileDialog.Filter = "Excel файлы (*.xlsx)|*.xlsx|Все файлы (*.*)|*.*";
+                saveFileDialog.Title = "Выберите место сохранения файла Excel";
 
+                // Отображение диалогового окна
+                bool? result = saveFileDialog.ShowDialog();
+
+                // Проверка результата диалога выбора файла
+                if (result == true)
+                {
+                    string filePath = saveFileDialog.FileName;
+
+                    // Создание нового документа Excel
+                    var workbook = new XLWorkbook();
+
+                    // Добавление нового листа
+                    var worksheet = workbook.Worksheets.Add("Данные");
+
+                    var dataTable = (this.Statistic_DataGrid.ItemsSource as DataView).Table;
+
+                    // Заполнение заголовков столбцов
+                    for (int col = 0; col < dataTable.Columns.Count; col++)
+                    {
+                        worksheet.Cell(1, col + 1).Value = dataTable.Columns[col].ColumnName;
+                    }
+
+                    // Заполнение данных
+                    for (int row = 0; row < dataTable.Rows.Count; row++)
+                    {
+                        for (int col = 0; col < dataTable.Columns.Count; col++)
+                        {
+                            if (DateTime.TryParse(dataTable.Rows[row].ItemArray[col].ToString(), out var date_val))
+                            {
+                                var vs = XLCellValue.FromObject(date_val);
+                                worksheet.Cell(row + 2, col + 1).Value = vs;
+                            }
+                            if (Int32.TryParse(dataTable.Rows[row].ItemArray[col].ToString(), out var int_val))
+                            {
+                                var vs = XLCellValue.FromObject(int_val);
+                                worksheet.Cell(row + 2, col + 1).Value = vs;
+                            }
+                            else
+                            {
+                                var vs = XLCellValue.FromObject(dataTable.Rows[row].ItemArray[col]);
+                                worksheet.Cell(row + 2, col + 1).Value = vs;
+                            }
+
+                        }
+                    }
+
+                    // Сохранение документа Excel
+                    workbook.SaveAs(filePath);
+                }
+            }
+            catch (Exception ex) 
+            {
+                if (ex.Message.Contains("being used"))
+                {
+                    MessageBox.Show("Невозможно сохранить данные в открытый файл", "Ошибка сохранения", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                else
+                {
+                    MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            
         }
+
+        #region chiefdata_filter_staff_date_Grid
+
+        private async void chiefdata_filter_staff_date_Button_Click(object sender, RoutedEventArgs e)
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"SELECT * FROM chiefdata_filter_staff_date('{chiefdata_filter_staff_date_DatePicker.SelectedDate:yyyy-MM-dd}')";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "ФИО", "staff_surnamenp" },
+                    { "Название отделения", "Department_Name" },
+                    { "Дата принятия на работу", "staff_employmentdate" },
+                    { "Должность", "role" }
+                });
+
+                this.Statistic_DataGrid.ItemsSource = new DataView(dt);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+
+            (sender as Button).Content = "Обновить";
+        }
+
+        #endregion
+
+        #region All_MostPopular_Diesease_Grid
+
+        private async void All_MostPopular_Diesease_Button_Click(object sender, RoutedEventArgs e)
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = "SELECT * FROM \"All_MostPopular_Diesease\"";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "Наименование", "concat" },
+                    { "Значение", "count" }
+                });
+
+                this.Statistic_DataGrid.ItemsSource = new DataView(dt);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+        }
+
+        #endregion
+
+        #region expensive_hospital_stays_Grid
+
+        private async void expensive_hospital_stays_Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Int32.TryParse(expensive_hospital_stays_TextBox.Text, out int min))
+            {
+                MessageBox.Show("Невозможно считать минимальную стоимость", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"SELECT * FROM expensive_hospital_stays({min})";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "Отделение", "department_name" },
+                    { "Количество", "count" }
+                });
+
+                this.Statistic_DataGrid.ItemsSource = new DataView(dt);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+
+            (sender as Button).Content = "Обновить";
+        }
+
+        #endregion
+
+        #region get_doctors_with_patientscount_byname_Grid
+
+        private async void get_doctors_with_patientscount_byname_Button_Click(object sender, RoutedEventArgs e)
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"SELECT * FROM get_doctors_with_patientscount_byname('{get_doctors_with_patientscount_byname_TextBox.Text}')";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "Доктор", "staff_surname" },
+                    { "Количество пациентов", "patient_count" }
+                });
+
+                this.Statistic_DataGrid.ItemsSource = new DataView(dt);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+
+            (sender as Button).Content = "Обновить";
+        }
+
+        #endregion
+
+        #region get_departments_with_total_salary_Grid
+
+        private async void get_departments_with_total_salary_Button_Click(object sender, RoutedEventArgs e)
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"SELECT * FROM get_departments_with_total_salary('{get_departments_with_total_salary_TextBox.Text}')";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "Отделение", "department_name" },
+                    { "Общий оклад", "total_salary" }
+                });
+
+                this.Statistic_DataGrid.ItemsSource = new DataView(dt);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+
+            (sender as Button).Content = "Обновить";
+        }
+
+        #endregion
+
+        #region get_staff_count_by_dept_and_date_Grid
+
+        List<String> Departments = new();
+        private async void get_staff_count_by_dept_and_date_Button_Click(object sender, RoutedEventArgs e)
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"SELECT * FROM get_staff_count_by_dept_and_date('{get_staff_count_by_dept_and_date_ComboBox.Text}', '{get_staff_count_by_dept_and_date_DatePicker.Text}')";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "Отделение", "department_name" },
+                    { "Количество сотрудников", "staff_count" }
+                });
+
+                this.Statistic_DataGrid.ItemsSource = new DataView(dt);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+
+            (sender as Button).Content = "Обновить";
+        }
+
+        #endregion
+
+        #region get_doctor_appointment_count_Grid
+
+        private async void get_doctor_appointment_count_Click(object sender, RoutedEventArgs e)
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"SELECT * FROM get_doctor_appointment_count";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "ФИО врача", "Staff_SurnameNP" },
+                    { "Количество назначений", "count" }
+                });
+
+                this.Statistic_DataGrid.ItemsSource = new DataView(dt);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+        }
+
+        #endregion
+
+        #region staff_roles_count_Grid
+
+        private async void staff_roles_count_Click(object sender, RoutedEventArgs e)
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"SELECT * FROM \"Staff_Roles_Count\"";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "Должность", "role" },
+                    { "Количество сотрудников", "count" }
+                });
+
+                this.Statistic_DataGrid.ItemsSource = new DataView(dt);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+        }
+
+        #endregion
+
+        #region notdiseases_currmonth_Grid
+
+        private async void notdiseases_currmonth_Click(object sender, RoutedEventArgs e)
+        {
+            var conn = ConnectionCarrier.Carrier.Connection;
+
+            try
+            {
+                await ConnectionCarrier.Carrier.OpenConnectionAsyncSave();
+                String sql = $"SELECT * FROM \"NotDiseases_CurrMonth\"";
+                var reader = await new NpgsqlCommand(sql, conn).ExecuteReaderAsync();
+
+                var dt = this.NpgsqlDataReader_To_DataTable(reader, new Dictionary<string, string>()
+                {
+                    { "Болезнь", "Disease_Name" }
+                });
+
+                this.Statistic_DataGrid.ItemsSource = new DataView(dt);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                await conn.CloseAsync();
+            }
+        }
+
+        #endregion
     }
 }
