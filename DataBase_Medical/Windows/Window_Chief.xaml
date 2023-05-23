@@ -578,7 +578,7 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <ListView Grid.Column="0" SelectionChanged="ListView_SelectionChanged" SelectionMode="Single">
+            <ListView x:Name="listView" Grid.Column="0" SelectionChanged="ListView_SelectionChanged" SelectionMode="Single">
                 <ListViewItem>
                     Список сотрудников принятых с
                 </ListViewItem>

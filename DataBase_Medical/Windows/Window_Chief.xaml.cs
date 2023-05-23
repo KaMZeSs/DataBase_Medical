@@ -1056,10 +1056,9 @@ namespace DataBase_Medical.Windows
             }
         }
 
-        // TODO
         private void Statistic_View_Statistic_Button_Click(object sender, RoutedEventArgs e)
         {
-
+            new Window_Plot((this.Statistic_DataGrid.ItemsSource as DataView).Table, (listView.SelectedItem as ListViewItem).Content.ToString()).Show();
         }
 
         private void Statistic_Export_Statistic_Button_Click(object sender, RoutedEventArgs e)
